@@ -15,6 +15,8 @@ In this course, all assignments are given in python. You can do the assignments 
 
 - Your own computer: Follow our [python setup instructions](python_setup_instructions.md) to setup your own environment
 
+- Cybele lab: [guide](working_on_cybele_computers.md)
+
 ### Download the starter code
 
 Clone this repostiory:
