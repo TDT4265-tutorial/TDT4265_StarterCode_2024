@@ -1,0 +1,17 @@
+name: tdt4265
+dependencies:
+  - pip
+  - python=3.10
+  - pip:
+      - nbconvert==7.14.2
+      - numpy==1.26.3
+      - pandoc==2.3
+      - scikit-learn==1.4.0
+      - torch==2.1.2
+      - torchvision==0.16.2
+      - tqdm==4.66.1
+      - matplotlib==3.8.2
+      - scikit-image==0.22.0
+      - notebook
+      
+
