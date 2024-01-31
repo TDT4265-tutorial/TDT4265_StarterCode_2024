@@ -38,7 +38,7 @@ class BaseTrainer:
         """
         pass
 
-    def train_step(self):
+    def train_step(self, X_batch: np.ndarray, Y_batch: np.ndarray):
         """
             Perform forward, backward and gradient descent step here.
         Args:
