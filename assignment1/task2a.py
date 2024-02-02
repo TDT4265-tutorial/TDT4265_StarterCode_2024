@@ -1,5 +1,8 @@
 import numpy as np
 import utils
+
+from sklearn import LogisticRegression
+
 np.random.seed(1)
 
 
@@ -13,7 +16,15 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
-    return X
+    print(X.shape)
+    X_normalized = (X / 127.5) - 1.0
+    print(X_normalized[1])
+    #bias trick
+    bias_column = np.ones((X_normalized.shape[0], 1))
+    X_processed = np.concatenate((X_normalized, bias_column), axis=1)
+    print(X_processed.shape)
+
+    return X_processed
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
@@ -46,6 +57,9 @@ class BinaryModel:
             y: output of model with shape [batch size, 1]
         """
         # TODO implement this function (Task 2a)
+
+        
+
         return None
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
