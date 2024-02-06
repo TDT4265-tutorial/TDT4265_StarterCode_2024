@@ -35,10 +35,13 @@ class LogisticTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
+        
         logits = self.model.forward(X_batch)
         self.model.backward(X_batch, logits, Y_batch)
         self.model.w = self.model.w - \
             self.learning_rate * self.model.grad
+            
+        logits = self.model.forward(X_batch)
         loss = cross_entropy_loss(Y_batch, logits)
         return loss
 
@@ -67,7 +70,7 @@ class LogisticTrainer(BaseTrainer):
 
 def main():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs = 50
+    num_epochs = 500
     learning_rate = 0.05
     batch_size = 128
     shuffle_dataset = False
