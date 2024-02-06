@@ -60,11 +60,8 @@ class BinaryModel:
         # TODO implement this function (Task 2a)
         # y = sigmoid(Xw), as stated in the assignment
         
-        #Defining the dot product of W transpose and X
-        WT_X = np.dot(np.transpose(self.w), X) 
-        
         #Defining the sigmoid function
-        y = 1/(1 + np.exp(-WT_X))
+        y = 1 / (1 + np.exp(-np.dot(X, self.w)))
         
 
         return y
