@@ -38,15 +38,22 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
-        z = lambda x,k: self.w.T[k].dot(x)
+        # z = lambda x,k: self.w.T[k].dot(x)
 
-        model = lambda x,k: np.exp(z(x,k))/(np.sum([np.exp(z(x,k)) for k in range(self.num_outputs)]))
+        # model = lambda x,k: np.exp(z(x,k))/(np.sum([np.exp(z(x,k)) for k in range(self.num_outputs)]))
         
-        class_probs = []
-        for i in range(self.num_outputs):
-            class_probs.append(np.apply_along_axis(model, 1, X, i))
+        # class_probs = []
+        # for i in range(self.num_outputs):
+        #     class_probs.append(np.apply_along_axis(model, 1, X, i))
         
-        return np.array(class_probs).T
+        # return np.array(class_probs).T
+        z = self.w.T.dot(X.T)
+
+        exp_z = np.exp(z)
+        sum_exp_z = np.sum(exp_z, axis=0)
+        
+        class_probs = exp_z / sum_exp_z
+        return class_probs.T
         
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -97,8 +104,6 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
         loc=0, scale=1/model.w.shape[0]**2, size=model.w.shape)
 
     epsilon = 1e-3
-    total = model.w.shape[0]*model.w.shape[1]
-    iter = 0
     
     for i in range(model.w.shape[0]):
         for j in range(model.w.shape[1]):
@@ -121,8 +126,6 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
                 f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i, j]}\n" \
                 f"If this test fails there could be errors in your cross entropy loss function, " \
                 f"forward function or backward function"
-        iter += 1
-        print(iter/total*100, "% done")
 
 
 def main():
