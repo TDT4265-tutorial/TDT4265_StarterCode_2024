@@ -97,6 +97,9 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
         loc=0, scale=1/model.w.shape[0]**2, size=model.w.shape)
 
     epsilon = 1e-3
+    total = model.w.shape[0]*model.w.shape[1]
+    iter = 0
+    
     for i in range(model.w.shape[0]):
         for j in range(model.w.shape[1]):
             model.w = w_orig.copy()
@@ -118,6 +121,8 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
                 f"Approximation: {gradient_approximation}, actual gradient: {model.grad[i, j]}\n" \
                 f"If this test fails there could be errors in your cross entropy loss function, " \
                 f"forward function or backward function"
+        iter += 1
+        print(iter/total*100, "% done")
 
 
 def main():
