@@ -65,7 +65,7 @@ class SoftmaxModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
         
-        self.grad = -np.dot(X.T, targets - outputs)/X.shape[0]
+        self.grad = -X.T.dot(targets - outputs)/X.shape[0] 
             
 
     def zero_grad(self) -> None:
@@ -140,6 +140,8 @@ def main():
     np.testing.assert_almost_equal(
         logits.mean(), 1/10,
         err_msg="Since the weights are all 0's, the softmax activation should be 1/10")
+    
+    print("forward test passed!")
 
     # Gradient approximation check for 100 images
     X_train = X_train[:100]
@@ -148,6 +150,7 @@ def main():
         gradient_approximation_test(model, X_train, Y_train)
         model.w = np.random.randn(*model.w.shape)
 
+    print("All tests passed!")
 
 if __name__ == "__main__":
     main()
