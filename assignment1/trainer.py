@@ -91,7 +91,15 @@ class BaseTrainer:
                     # TODO (Task 2d): Implement early stopping here.
                     # You can access the validation loss in val_history["loss"]
                     # Stop the training if the validation loss does not improve after passing through the validation set 10 times.
-                    
+                    # if global_step / num_steps_per_val > 10:
+                    #     current_check = val_history["loss"][global_step - 10 * num_steps_per_val]
+                        
+                    #     for i in range(9, -1, -1):
+                    #         if val_history["loss"][global_step - i * num_steps_per_val] < current_check:
+                    #             break
+                    #         if i == 0:
+                    #             print("Early stopping")
+                    #             return train_history, val_history
                     
                 global_step += 1
         return train_history, val_history
