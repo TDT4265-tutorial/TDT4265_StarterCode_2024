@@ -37,9 +37,13 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
         Cross entropy error (float)
     """
     # TODO implement this function (Task 2a)
+    N= targets.shape[0]
+    #C = cross entropy loss. This implementation is valid for binary classification
+    C = (-1/N) * np.sum(targets * np.log(outputs) + (1-targets)*np.log(1-outputs))
+
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
+    return C
 
 
 class BinaryModel:
