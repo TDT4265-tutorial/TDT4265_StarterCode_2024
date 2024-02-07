@@ -16,14 +16,11 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
-    print(X.shape)
    
     X = (X - 127.5) / 127.5
-    print(X[1])
     #bias trick
     bias_column = np.ones((X.shape[0], 1))
     X = np.concatenate((X, bias_column), axis=1)
-    print(X.shape)
 
     return X
 

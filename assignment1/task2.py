@@ -16,7 +16,19 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
         Accuracy (float)
     """
     # TODO Implement this function (Task 2c)
-    accuracy = 0.0
+
+    Y_pred=model.forward(X)
+    #at this point th model returns predictions (0,1) but we need classifications to determin acc
+    #apply a treshold og 0,5. that is if y_pred>0,5 it is set to class 1 else class 0
+    Y_class = (Y_pred >= 0.5).astype(int)
+
+    #accuracy = correct predictions / total number of predictins
+    correct_classifications = np.sum(Y_class == targets)
+    total_classifications = len(Y_class)
+    accuracy = correct_classifications/total_classifications
+    comparison = np.column_stack((Y_class, targets))
+    
+        
     return accuracy
 
 
@@ -37,7 +49,8 @@ class LogisticTrainer(BaseTrainer):
         # TODO: Implement this function (task 2b)
         outputs = self.model.forward(X_batch)
         loss = cross_entropy_loss(Y_batch, outputs)
-
+        
+        # updates self.model.grad
         self.model.backward(X_batch, outputs, Y_batch)
         self.model.w -= self.learning_rate * self.model.grad
 
