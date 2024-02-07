@@ -2,7 +2,6 @@ import numpy as np
 import utils
 
 
-from sklearn.linear_model import LogisticRegression
 
 np.random.seed(1)
 
@@ -18,8 +17,8 @@ def pre_process_images(X: np.ndarray):
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
     print(X.shape)
-    mean_pixel = np.mean(X, axis=1, keepdims=True)
-    X = (X - mean_pixel) / 127.5
+   
+    X = (X - 127.5) / 127.5
     print(X[1])
     #bias trick
     bias_column = np.ones((X.shape[0], 1))
@@ -85,6 +84,12 @@ class BinaryModel:
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+        
+        error = targets - outputs
+        self.grad = -np.dot((error).T,X).T / (targets.shape[0]*targets.shape[1]) # Original 2a
+
+        #self.grad = -np.dot(X.T, error)
+
 
     def zero_grad(self) -> None:
         self.grad = None
