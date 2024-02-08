@@ -73,6 +73,14 @@ class BaseTrainer:
         )
 
         global_step = 0
+
+
+        #Variables to keep track of stop critera, step count and best loss
+        step_count = 0
+        stop_criteria = 10 #Early stop criteria - validation loss does not improve after stop_criteria = 10
+        best_loss = np.inf #Intilized to infinity first
+
+        #Defining a stop int
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
@@ -90,5 +98,28 @@ class BaseTrainer:
 
                     # TODO (Task 2d): Implement early stopping here.
                     # You can access the validation loss in val_history["loss"]
+
+                    '''
+                    First checking if validation loss is better than the previous one, 
+                    and if it is, change it to the current one, and set step count to 0.
+                    If validation loss doesnt improve, keep best loss as previously stated and 
+                    then increase step count.
+                    When it reaches stop_criteria, return train history and valhistory
+                    '''
+
+                    if stop_criteria:
+                        if val_loss < best_loss:
+                            best_loss = val_loss
+                            step_count = 0
+                        else:
+                            step_count += 1
+
+                    if step_count == stop_criteria:
+                        print("Stop epoch: ", epoch, " at ", global_step, " steps")
+                        return train_history, val_history
+                    
+
+
+
                 global_step += 1
         return train_history, val_history
