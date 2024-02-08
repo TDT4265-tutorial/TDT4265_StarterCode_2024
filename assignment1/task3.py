@@ -17,16 +17,27 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (task 3c)
-    Y_pred=model.forward(X)
-    #Y_class= np.zeros(Y_pred.shape[1])[np.argmax(Y_pred)]=1
+    '''
+    Y_pred is the predictions, found by doing one forward step
+    '''
+    Y_pred = model.forward(X)
 
-    Y_class = np.zeros_like(Y_pred)
-    Y_class[np.arange(len(Y_pred)), np.argmax(Y_pred, axis=1)] = 1
 
-    correct_classifications = np.sum(Y_class == targets)
-    tot=Y_class.shape[0]
-    accuracy=correct_classifications/tot
+    '''
+    Here, the program finds the indices of the maximum value across the columns for each row with np.argmax, both for
+    the predictions and the targets. Then it sums up how many of these are equal
+    '''
+    predicted_classes = np.argmax(Y_pred, axis=1)
+    actual_classes = np.argmax(targets, axis=1)
+    Y_correct = np.sum(np.equal(predicted_classes, actual_classes))
+    
+    
+    accuracy = Y_correct/Y_pred.shape[0]
+
     return accuracy
+    
+
+   
 
 
 class SoftmaxTrainer(BaseTrainer):
