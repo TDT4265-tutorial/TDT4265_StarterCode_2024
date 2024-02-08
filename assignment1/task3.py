@@ -142,11 +142,17 @@ def main():
     # Train a model with L2 regularization (task 4b)
 
     model1 = SoftmaxModel(l2_reg_lambda=1.0)
+    model2 = SoftmaxModel(l2_reg_lambda=0.0)
+    
     trainer = SoftmaxTrainer(
         model1, learning_rate, batch_size, shuffle_dataset,
         X_train, Y_train, X_val, Y_val,
-    )
+    )   
+    trainer2 = SoftmaxTrainer(model2, learning_rate, batch_size, shuffle_dataset, X_train, Y_train, X_val, Y_val)    
+    
     train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
+    train_history_reg02, val_history_reg02 = trainer2.train(num_epochs)
+    
     # You can finish the rest of task 4 below this point.
 
     # Plotting of softmax weights (Task 4b)

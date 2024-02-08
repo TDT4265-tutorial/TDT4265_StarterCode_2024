@@ -80,7 +80,7 @@ class SoftmaxModel:
         batch_size=targets.shape[0]
         error =targets-outputs
         self.grad = np.transpose((-np.dot(error.T, X)/batch_size))
-
+        self.grad += 2*L2*self.w #Derivative of L2 regularization term
 
     def zero_grad(self) -> None:
         self.grad = None
