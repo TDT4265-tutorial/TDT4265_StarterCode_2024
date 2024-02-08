@@ -81,11 +81,9 @@ class BinaryModel:
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
-        
+        batch_size= targets.shape[0]
         error = targets - outputs
-        self.grad = -np.dot((error).T,X).T / (targets.shape[0]*targets.shape[1]) # Original 2a
-
-        #self.grad = -np.dot(X.T, error)
+        self.grad = np.transpose(-np.dot((error).T,X))/ (batch_size)
 
 
     def zero_grad(self) -> None:
