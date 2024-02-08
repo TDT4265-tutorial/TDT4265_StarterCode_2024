@@ -53,8 +53,8 @@ class BinaryModel:
         """
         # TODO implement this function (Task 2a)
         z = np.dot(X, self.w)
-        sigmoid = 1/(1+np.exp(-z))
-        return sigmoid
+        outputs = 1/(1+np.exp(-z))
+        return outputs
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """

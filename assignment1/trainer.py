@@ -72,6 +72,10 @@ class BaseTrainer:
             accuracy={}
         )
 
+        no_improvement_counter = 0
+        best_improvement = np.inf
+        no_improvement_threshhold = 10
+
         global_step = 0
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
@@ -90,5 +94,16 @@ class BaseTrainer:
 
                     # TODO (Task 2d): Implement early stopping here.
                     # You can access the validation loss in val_history["loss"]
+                    if val_loss > best_improvement:
+                        no_improvement_counter += 1
+                    else:
+                        no_improvement_counter = 0
+                        best_improvement = val_loss
+
+                    if no_improvement_counter >= no_improvement_threshhold:
+                        print(
+                            f"Early stopping triggered after {epoch + 1} epochs and {global_step + 1} global steps.")
+                        return train_history, val_history
+
                 global_step += 1
         return train_history, val_history
