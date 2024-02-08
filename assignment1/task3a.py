@@ -15,17 +15,20 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     # TODO implement this function (Task 3a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    raise NotImplementedError
+    
+
+    cross_entropy = -np.sum(targets*np.log(outputs), axis=1)
+    return np.mean(cross_entropy)
 
 
 class SoftmaxModel:
 
     def __init__(self, l2_reg_lambda: float):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
 
         # Define number of output nodes
-        self.num_outputs = None
+        self.num_outputs = 10
         self.w = np.zeros((self.I, self.num_outputs))
         self.grad = None
 
@@ -39,7 +42,15 @@ class SoftmaxModel:
             y: output of model with shape [batch size, num_outputs]
         """
         # TODO implement this function (Task 3a)
-        return None
+       
+        z = np.dot(X, self.w)
+        y_pred = np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
+        
+        return y_pred
+
+
+
+  
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -58,6 +69,12 @@ class SoftmaxModel:
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+        
+        
+        batch_size=targets.shape[0]
+        error =targets-outputs
+        self.grad = np.transpose((-np.dot(error.T, X)/batch_size))
+
 
     def zero_grad(self) -> None:
         self.grad = None
@@ -77,7 +94,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Y_onehotencoded= np.zeros((Y.shape[0],num_classes))
     for i in range(Y.shape[0]):
         Y_onehotencoded[i, int(Y[i])]=1
-    #print(Y_onehotencoded[1])  
+    
     return Y_onehotencoded
 
 
