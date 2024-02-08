@@ -94,7 +94,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Y_onehotencoded= np.zeros((Y.shape[0],num_classes))
     for i in range(Y.shape[0]):
         Y_onehotencoded[i, int(Y[i])]=1
-    #print(Y_onehotencoded[1])  
+    
     return Y_onehotencoded
 
 

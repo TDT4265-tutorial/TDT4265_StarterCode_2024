@@ -18,7 +18,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     # TODO Implement this function (Task 2c)
 
     Y_pred=model.forward(X)
-    print(Y_pred[0])
+
     #at this point th model returns predictions (0,1) but we need classifications to determin acc
     #apply a treshold og 0,5. that is if y_pred>0,5 it is set to class 1 else class 0
     Y_class = (Y_pred >= 0.5).astype(int)
