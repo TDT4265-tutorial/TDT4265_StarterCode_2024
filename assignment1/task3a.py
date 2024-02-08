@@ -64,13 +64,19 @@ class SoftmaxModel:
         # TODO implement this function (Task 3a)
         # To implement L2 regularization task (4b) you can get the lambda value in self.l2_reg_lambda
         # which is defined in the constructor.
+
+
+        
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
         
+        #Lambda value
+        L2 = self.l2_reg_lambda 
         
+
         batch_size=targets.shape[0]
         error =targets-outputs
         self.grad = np.transpose((-np.dot(error.T, X)/batch_size))
