@@ -22,7 +22,6 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     binary_list = outputs > 0.5
 
     correct_guesses = np.sum(binary_list == targets)
-
     accuracy = correct_guesses / len(targets)
 
     return accuracy
