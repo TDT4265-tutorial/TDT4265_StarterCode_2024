@@ -29,7 +29,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     accuracy = correct_classifications/total_classifications
     comparison = np.column_stack((Y_class, targets))
     
-        
+         
     return accuracy
 
 
