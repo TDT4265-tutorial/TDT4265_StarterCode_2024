@@ -161,7 +161,7 @@ def main():
 
     # Plotting of softmax weights (Task 4b)
     
-    #Reshaping the weight matrix to 28x28 and removing the bias for each class
+    #Reshaping the weight matrix to 28x28 and removing the bias for each of the ten classes
     imgWeights1 = model1.w[:-1, :].reshape(28, 28, 10)
     imgWeights2 = model2.w[:-1, :].reshape(28, 28, 10)
     
@@ -188,8 +188,10 @@ def main():
     # Plotting of accuracy for difference values of lambdas (task 4c)
     l2_lambdas = [1, .1, .01, .001]
     
-    #Creating a list to store the accuracy for each lambda
+    #Creating a list to store the accuracy for each lambda, as well as norms
+    #for each weight
     accuracies = []
+    l2_norms = []
     
     #Iterating over each lambda and training a model with that lambda
     for i in l2_lambdas:
@@ -200,6 +202,9 @@ def main():
         )
         train_history, val_history = trainer.train(num_epochs)
         accuracies.append(val_history["accuracy"])
+        #4e - Calculating the l2 norm for each weight using np.linalg.norm
+        l2_norms.append(np.linalg.norm(model.w))
+        
         
     #Plotting the accuracy figures for each lambda
     
@@ -209,16 +214,22 @@ def main():
     for i in range(len(l2_lambdas)):
         utils.plot_loss(accuracies[i], label=f"Lambda = {l2_lambdas[i]}")
     plt.xlabel("Number of Training Steps")
-    plt.ylabel("Accuracy")
+    plt.ylabel("Validation accuracy")
     plt.legend()
     plt.savefig("task4c_l2_reg_accuracy.png")
     plt.show()
 
-    #Task 4e - Plotting of the l2 norm for each weight
-    
-    
+    #Task 4e - Plotting the l2 norm for each weight
+    plt.figure()
+    plt.plot(l2_lambdas, l2_norms)
+    plt.xlabel("Lambda")
+    plt.ylabel("L2 norm")
+    plt.title("L2 norm of weights")
+    plt.legend()
+    plt.savefig("task4d_l2_reg_norms.png")
+    plt.show()
 
-    #plt.savefig("task4d_l2_reg_norms.png")
+    
 
 
 if __name__ == "__main__":
