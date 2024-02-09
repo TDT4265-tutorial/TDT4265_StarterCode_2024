@@ -174,6 +174,14 @@ def main():
         )
 
         train_history, val_history = trainer.train(num_epochs)
+        l2_norm = np.linalg.norm(model.w)
+        l2_norms.append(l2_norm)
+        validation_accuracies[l2_reg_lambda] = val_history['accuracy']
+        visualize_weights(
+            model, f"Weights with L2 Regularization (λ = {l2_reg_lambda})")
+
+        utils.plot_loss(
+            val_history["accuracy"], f"Validation Accuracy for lambda value: {l2_reg_lambda}")
 
         print("Final Train Cross Entropy Loss:",
               cross_entropy_loss(Y_train, model.forward(X_train)))
@@ -183,14 +191,13 @@ def main():
         print("Final Validation accuracy:",
               calculate_accuracy(X_val, Y_val, model))
 
-        validation_accuracies[l2_reg_lambda] = val_history['accuracy']
-
-        visualize_weights(
-            model, f"Weights with L2 Regularization (λ = {l2_reg_lambda})")
-
         # Task 4e, compute the L2 norm of the weights
-        l2_norm = np.linalg.norm(model.w)
-        l2_norms.append(l2_norm)
+
+    plt.xlabel("Number of Training Steps")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.savefig("task4c_softmax_train_accuracy.png")
+    plt.show()
 
     plt.figure()
     plt.plot(l2_lambdas, l2_norms, marker='o')
