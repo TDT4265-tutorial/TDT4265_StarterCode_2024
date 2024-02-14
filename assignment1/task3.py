@@ -49,7 +49,6 @@ class SoftmaxTrainer(BaseTrainer):
 
         loss = cross_entropy_loss(Y_batch, logits)
         return loss
-        return loss
 
     def validation_step(self):
         """
@@ -89,7 +88,7 @@ def main():
     Y_train = one_hot_encode(Y_train, 10)
     Y_val = one_hot_encode(Y_val, 10)
 
-    # ANY PARTS OF THE CODE BELOW THIS CAN BE CHANGED.
+    # # ANY PARTS OF THE CODE BELOW THIS CAN BE CHANGED.
 
     # Intialize model
     model = SoftmaxModel(l2_reg_lambda)
@@ -138,16 +137,73 @@ def main():
     # You can finish the rest of task 4 below this point.
 
     # Plotting of softmax weights (Task 4b)
-    # plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
-
+    plot_weights(model.w[1:], "task4b_softmax_weight.png")
+    plot_weights(model1.w[1:], "task4b_softmax_weight_L2Norm.png")
+    
     # Plotting of accuracy for difference values of lambdas (task 4c)
+    plt.ylim([0.75, .95])
+    weights = []
+    
     l2_lambdas = [1, .1, .01, .001]
+    for l2_lambda in l2_lambdas:
+        model = SoftmaxModel(l2_lambda)
+        trainer = SoftmaxTrainer(
+            model, learning_rate, batch_size, shuffle_dataset,
+            X_train, Y_train, X_val, Y_val,
+        )
+        _, val_history = trainer.train(num_epochs)
+        weights.append(model.w)
+        
+        utils.plot_loss(val_history["accuracy"], "eambda = " + str(l2_lambda))
+        
+        
+    plt.xlabel("Number of Training Steps")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.savefig("task4c_training_accuracy_with_different_lambda.png")
     plt.savefig("task4c_l2_reg_accuracy.png")
+    
+    plt.show()
+    
 
     # Task 4d - Plotting of the l2 norm for each weight
-
+    # Plot the length (L2 norm, ||w||2) of the weight vector for the each λ value in task 
+    # 4c. What do you observe? Plot the λ value on the x-axis and the L2 norm on the y-axis.
+    l2_norms = [np.linalg.norm(w[1:]) for w in weights]
+    plt.plot(l2_lambdas, l2_norms)
+    plt.xlabel("Lambda")
+    plt.ylabel("L2 norm")
     plt.savefig("task4d_l2_reg_norms.png")
+    
+    plt.show()
 
+    l2_lambdas.reverse()
+    l2_norms.reverse()
+    plt.bar(range(len(l2_lambdas)), l2_norms, tick_label=l2_lambdas, width=0.5)
+    plt.xlabel("Lambda")
+    plt.ylabel("L2 norm")
+    plt.savefig("task4d_l2_reg_norms_bar.png")
+    
+    plt.show()
+    
+    
+def plot_weights(weights, title):
+    """
+    Plots the weights of the model
+    Args:
+        weights: weights of the model
+        title: title of the plot
+    """
+    weights = weights.reshape(28, 28, 10)
+    plt.figure(figsize=(10, 1))  # Adjust the figure size to fit the images
+    for i in range(10):
+        plt.subplot(1, 10, i+1)
+        plt.imshow(weights[:, :, i], cmap="gray")
+        plt.axis("off")
+
+    # Make plot fit the size of the images
+    plt.tight_layout()
+    plt.savefig(title)  
 
 if __name__ == "__main__":
     main()

@@ -64,7 +64,6 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-        # TODO To implement L2 regularization task (4b) you can get the lambda value in self.l2_reg_lambda
         
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
@@ -72,7 +71,7 @@ class SoftmaxModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
         
-        self.grad = -X.T.dot(targets - outputs)/X.shape[0] 
+        self.grad = -X.T.dot(targets - outputs)/X.shape[0] + self.l2_reg_lambda*self.w
             
 
     def zero_grad(self) -> None:

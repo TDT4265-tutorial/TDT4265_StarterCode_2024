@@ -88,7 +88,7 @@ class BaseTrainer:
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
 
-                    # TODO (Task 2d): Implement early stopping here.
+                    # EARLY STOPPING 
                     # You can access the validation loss in val_history["loss"]
                     # Stop the training if the validation loss does not improve after passing through the validation set 10 times.
                     if global_step / num_steps_per_val > 10:
@@ -99,6 +99,16 @@ class BaseTrainer:
                                 break
                             if i == 0:
                                 print("Early stopping, step: ", global_step)
+                                print("Early stopping, epoch: ", epoch)
+                                ## Remove the last 10 steps from the history
+                                for i in range(10):
+                                    val_history["loss"].pop(global_step - i * num_steps_per_val)
+                                    val_history["accuracy"].pop(global_step - i * num_steps_per_val)
+                                    train_history["accuracy"].pop(global_step - i * num_steps_per_val)
+                                # Clear the training history from global_step - 10 * num_steps_per_val
+                                for i in range(10 * num_steps_per_val):
+                                    train_history["loss"].pop(global_step - i)
+                               
                                 return train_history, val_history
                     
                 global_step += 1
