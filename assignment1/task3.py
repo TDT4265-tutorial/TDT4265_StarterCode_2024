@@ -40,6 +40,7 @@ class SoftmaxTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
+
         # TODO: Implement this function (task 3b)
         outputs = self.model.forward(X_batch)
         #print(outputs)
@@ -95,6 +96,7 @@ def main():
     # Train model
     trainer = SoftmaxTrainer(
         model, learning_rate, batch_size, shuffle_dataset,
+    np.random.uniform(-1, 1, (785, 64))
         X_train, Y_train, X_val, Y_val,
     )
     train_history, val_history = trainer.train(num_epochs)

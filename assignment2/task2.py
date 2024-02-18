@@ -53,10 +53,12 @@ class SoftmaxTrainer(BaseTrainer):
         """
         # TODO: Implement this function (task 2c)
 
+        logits = self.model.forward(X_batch)
+        #print(outputs)
+        self.model.backward(X_batch, logits, Y_batch)
         loss = 0
-
-            self.model.ws[layer_idx] = (
-                self.model.ws[layer_idx] - self.learning_rate * grad
+        for layer_idx, w in enumerate(self.model.ws):
+            self.model.ws[layer_idx] = (self.model.ws[layer_idx] - self.learning_rate * self.model.grads[layer_idx])
         loss=cross_entropy_loss(Y_batch, logits)  # sol
 
         return loss
@@ -109,6 +111,8 @@ def main():
     model=SoftmaxModel(
         neurons_per_layer, use_improved_sigmoid, use_improved_weight_init, use_relu
     )
+    model.grads[0] = np.random.uniform(-1, 1, (785, 64))
+    model.grads[1] = np.random.uniform(-1, 1, (64, 10))
     trainer=SoftmaxTrainer(
         momentum_gamma,
         use_momentum,

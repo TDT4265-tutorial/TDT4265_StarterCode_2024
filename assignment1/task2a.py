@@ -71,11 +71,15 @@ class BinaryModel:
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)
+        print("grad shape: ", self.grad.shape)
         delta_y = targets - outputs
+        print("delta_y shape: ", delta_y.shape)
         out = X.transpose().dot(delta_y)
+        print("out shape: ", out.shape)
         self.grad = -out/X.shape[0]
+        print("grad shape: ", self.grad.shape)
         #print("Grad:")
-        #print(self.grad)
+        print("X shape: ", X.shape)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
         
@@ -111,6 +115,7 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
         print("approx grad")
         print(gradient_approximation)
         print()
+        input()
         difference = gradient_approximation - model.grad[i, 0]
         assert abs(difference) <= epsilon**2,\
             f"Calculated gradient is incorrect. " \
