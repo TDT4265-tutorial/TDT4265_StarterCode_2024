@@ -107,5 +107,6 @@ class BaseTrainer:
                         if not cont:
                             print(epoch)
                             stop = True
+                            print(f"Early stopping at epoch {epoch}, step {global_step}")
                 global_step += 1
         return train_history, val_history
