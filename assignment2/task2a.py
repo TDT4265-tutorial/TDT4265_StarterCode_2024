@@ -36,15 +36,11 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
         Cross entropy error (float)
     """
     # TODO implement this function (Task 3a)
-    sum = 0
-    for i in range(targets.shape[0]):
-        for j in range(targets.shape[1]):
-            sum -= targets[i, j]*np.log(outputs[i, j])
-    sum /= targets.shape[0]
-
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return sum
+
+    loss = -np.sum(targets * np.log(outputs)) / targets.shape[0]
+    return loss
 
 def sigmoid(X: np.ndarray):
     return 1/(1+np.exp(-X))
@@ -81,7 +77,10 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            if self.use_improved_weight_init:
+                w = np.random.normal(0, 1/np.sqrt(prev), w_shape)
+            else:
+                w = np.random.uniform(-1, 1, w_shape) 
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
@@ -98,12 +97,16 @@ class SoftmaxModel:
         # such as self.hidden_layer_output = ...
         #print("Input: ", X.shape)
         self.hidden_layer_z = X.dot(self.ws[0])
-        self.hidden_layer_a = sigmoid(self.hidden_layer_z)
+        if self.use_improved_sigmoid:
+            self.hidden_layer_a = 1.7159 * np.tanh((2/3) * self.hidden_layer_z)
+        else:
+            self.hidden_layer_a = sigmoid(self.hidden_layer_z)
         output_z = self.hidden_layer_a.dot(self.ws[1])
         output_e = np.exp(output_z)
-        #print("Sum output\n:", np.sum(output_e, axis=1).shape)
+        #print("Output", output_e.shape)
         sum = np.sum(output_e, axis=1)
         output_a = output_e/sum[:, None]
+        time.sleep(1)
 
         #print("Output: ", output_a.shape)
 
@@ -166,7 +169,10 @@ class SoftmaxModel:
         delta_y = targets - outputs
 
         wd = delta_y.dot(self.ws[1].transpose())
-        f_derivative = sigmoid(self.hidden_layer_z)*(1-sigmoid(self.hidden_layer_z))
+        if self.use_improved_sigmoid:
+            f_derivative = 1.7159 * (2/3) * (1 - np.tanh((2/3) * self.hidden_layer_z)**2)
+        else:
+            f_derivative = sigmoid(self.hidden_layer_z)*(1-sigmoid(self.hidden_layer_z))
         delta_1 = f_derivative * wd
         #print("SHape: ", wd.shape)
         
@@ -224,7 +230,7 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
     epsilon = 1e-3
     for layer_idx, w in enumerate(model.ws):
         for i in range(w.shape[0]):
-            #print(i)
+            print(i)
             for j in range(w.shape[1]):
                 orig = model.ws[layer_idx][i, j].copy()
                 model.ws[layer_idx][i, j] = orig + epsilon
