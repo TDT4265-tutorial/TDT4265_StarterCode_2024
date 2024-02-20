@@ -64,8 +64,8 @@ class SoftmaxTrainer(BaseTrainer):
 
         for layer_idx, grad in enumerate(self.model.grads):
             if self.use_momentum:
-                self.previous_grads[layer_idx] = self.momentum_gamma * self.previous_grads[layer_idx] + self.learning_rate * grad
-                self.model.ws[layer_idx] -= self.previous_grads[layer_idx]
+                self.previous_grads[layer_idx] = self.momentum_gamma * self.previous_grads[layer_idx] + grad
+                self.model.ws[layer_idx] -= self.learning_rate*self.previous_grads[layer_idx]
             else:
                 self.model.ws[layer_idx] -= self.learning_rate * grad
 
