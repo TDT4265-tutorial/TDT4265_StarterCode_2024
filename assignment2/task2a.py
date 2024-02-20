@@ -71,6 +71,8 @@ class SoftmaxModel:
         self.neurons_per_layer = neurons_per_layer
 
         # Initialize the weights
+        self.hidden_layer_z = [None for i in range(1+ len(neurons_per_layer))]
+        self.hidden_layer_a = [None for i in range(1+ len(neurons_per_layer))]
         self.ws = []
         prev = self.I
         print(self.neurons_per_layer)
@@ -82,7 +84,7 @@ class SoftmaxModel:
             else:
                 w = np.random.uniform(-1, 1, w_shape) 
             self.ws.append(w)
-            prev = size
+            prev = size + 1
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -96,21 +98,30 @@ class SoftmaxModel:
         # HINT: For performing the backward pass, you can save intermediate activations in variables in the forward pass.
         # such as self.hidden_layer_output = ...
         #print("Input: ", X.shape)
-        self.hidden_layer_z = X.dot(self.ws[0])
-        if self.use_improved_sigmoid:
-            self.hidden_layer_a = 1.7159 * np.tanh((2/3) * self.hidden_layer_z)
-        else:
-            self.hidden_layer_a = sigmoid(self.hidden_layer_z)
-        output_z = self.hidden_layer_a.dot(self.ws[1])
-        output_e = np.exp(output_z)
-        #print("Output", output_e.shape)
-        sum = np.sum(output_e, axis=1)
-        output_a = output_e/sum[:, None]
-        time.sleep(1)
+        
+        a_i = X
+        self.hidden_layer_a[0] = X
+        for i, w in enumerate(self.ws):
+            if i + 1 == len(self.ws):
+                self.hidden_layer_z[i+1] = np.c_[self.hidden_layer_a[i], 
+                                                 np.ones(len(self.hidden_layer_a[i]))].dot(w)
+                output_e = np.exp(self.hidden_layer_z[i+1])
+                sum = np.sum(output_e, axis=1)
+                self.hidden_layer_a[i+1] = output_e/sum[:, None]
+            else:
+                if i == 0:
+                    self.hidden_layer_z[i+1] = self.hidden_layer_a[i].dot(w)
+                else:
+                    self.hidden_layer_z[i+1] = np.c_[self.hidden_layer_a[i], 
+                                                 np.ones(len(self.hidden_layer_a[i]))].dot(w)
+                if self.use_improved_sigmoid:
+                    self.hidden_layer_a[i+1] = 1.7159 * np.tanh((2/3) * self.hidden_layer_z[i+1])
+                else:
+                    self.hidden_layer_a[i+1] = sigmoid(self.hidden_layer_z[i+1])
 
         #print("Output: ", output_a.shape)
 
-        return output_a
+        return self.hidden_layer_a[-1]
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -126,45 +137,6 @@ class SoftmaxModel:
             targets.shape == outputs.shape
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
 
-
-        '''
-        correct = 0
-        for i in range(len(outputs)):
-            matching = 0
-            current_max = outputs[i, 0]
-            for j in range(len(outputs[i])):
-                if outputs[i, j] > current_max:
-                    current_max = outputs[i, j]
-                    matching = j
-            if targets[i, matching] == 1:
-                correct += 1
-        print(targets[0])
-        print(correct)
-
-        delta_y = targets - outputs
-        print("Shape of delta_y", delta_y.shape)
-        #delta_y = np.mean(delta_y, axis=0)
-        #print("Shape of delta y", delta_y.shape)
-        # grad_2 =  np.outer(np.mean(self.hidden_layer_a, axis=0), delta_y)
-        print("Shape of self.hidden_layer_a", self.hidden_layer_a.shape)
-        grad_2 =  -self.hidden_layer_a.transpose().dot(delta_y)/X.shape[0]
-        print("Shape of grad_2", grad_2.shape)
-        
-        f_derivative = sigmoid(self.hidden_layer_z)*(1-sigmoid(self.hidden_layer_z))
-
-        print("Shape of f_derivative", f_derivative.shape)
-        #f_derivative = np.mean(f_derivative, axis=0)
-        k = (self.ws[1].dot(delta_y.transpose())).transpose()
-        print("Shape of k", k.shape)
-        print(f_derivative[0])
-        print(k[0])
-        print((f_derivative * k)[0])
-        delta_1 = f_derivative * (self.ws[1].dot(delta_y.transpose())).transpose()
-        print("Shape of self.ws[1]", self.ws[1].shape)
-        print("Shape of delta_1", delta_1.shape)
-        grad_1 = X.transpose().dot(f_derivative)
-
-        grad_1 = -X.transpose().dot(delta_1)/X.shape[0]
         '''
         delta_y = targets - outputs
 
@@ -181,7 +153,19 @@ class SoftmaxModel:
         grad_2 = -self.hidden_layer_a.transpose().dot(delta_y)/X.shape[0]
         #print("Dividing by ", X.shape[0])
 
+        '''
+        delta_prev =targets - outputs
 
+        for i, w in reversed(list(enumerate(self.ws))):
+            wd = delta_prev.dot(self.ws[i].transpose())
+            
+            self.grads[i] = -self.hidden_layer_a[i].transpose().dot(delta_prev)/X.shape[0]
+            if i > 0:
+                if self.use_improved_sigmoid:
+                    f_derivative = 1.7159 * (2/3) * (1 - np.tanh((2/3) * self.hidden_layer_z[i])**2)
+                else:
+                    f_derivative = sigmoid(self.hidden_layer_z)*(1-sigmoid(self.hidden_layer_z[i]))
+                delta_prev = f_derivative * wd[:, :len(wd[0])-1]
 
 
         #print("Shape of stuff", grad_1.shape)
@@ -189,12 +173,12 @@ class SoftmaxModel:
         # For example, self.grads[0] will be the gradient for the first hidden layer
 
 
-
-        self.grads = [grad_1, grad_2]
+        '''
         for grad, w in zip(self.grads, self.ws):
             assert (
                 grad.shape == w.shape
             ), f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
+        '''
 
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
@@ -228,7 +212,10 @@ def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarra
     ), f"X and Y should be of type np.ndarray!, got {type(X), type(Y)}"
     print("Gradiant test")
     epsilon = 1e-3
-    for layer_idx, w in enumerate(model.ws):
+    
+    logits = model.forward(X)
+    model.backward(X, logits, Y)
+    for layer_idx, w in enumerate(model.grads):
         for i in range(w.shape[0]):
             print(i)
             for j in range(w.shape[1]):
