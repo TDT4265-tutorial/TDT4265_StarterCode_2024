@@ -26,17 +26,19 @@ def pre_process_images(X: np.ndarray):
     return X
 
 
-def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
+def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
     Args:
-        targets: labels/targets of each image of shape: [batch size, 1]
-        outputs: outputs of model of shape: [batch size, 1]
+        targets: labels/targets of each image of shape: [batch size, num_classes]
+        outputs: outputs of model of shape: [batch size, num_classes]
     Returns:
         Cross entropy error (float)
     """
+    # TODO implement this function (Task 3a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return -np.sum(targets * np.log(outputs) + (1-targets) * np.log(1-outputs)) / targets.shape[0]
+    
+    return -np.sum(targets*np.log(outputs))/targets.shape[0]
 
 
 
@@ -87,18 +89,26 @@ class SoftmaxModel:
         # such as self.hidden_layer_output = ...
         
         # Hidden layer with sigmoid activation
-        sigmoid_activation_function = lambda x, w: 1/(1+np.exp(-w.T.dot(x)))
-        self.hidden_layer_output = np.apply_along_axis(sigmoid_activation_function, 1, X, self.ws[0])
+        sigmoid_activation_function = lambda x: 1/(1+np.exp(-self.ws[0].T.dot(x)))
+        self.hidden_layer_output = np.apply_along_axis(sigmoid_activation_function, 1, X)
 
         assert self.hidden_layer_output.shape[1] == self.neurons_per_layer[0], f"Hidden layer shape: {self.hidden_layer_output.shape[1]}, should be {self.neurons_per_layer[0]}"
         
         # Output layer with softmax activation
         z = self.ws[1].T.dot(self.hidden_layer_output.T)
+
         exp_z = np.exp(z)
         sum_exp_z = np.sum(exp_z, axis=0)
-        class_probs = exp_z / sum_exp_z
         
+        class_probs = exp_z / sum_exp_z
         return class_probs.T
+        
+        # z = self.ws[1].T.dot(self.hidden_layer_output.T)
+        # exp_z = np.exp(z)
+        # sum_exp_z = np.sum(exp_z, axis=0)
+        # class_probs = exp_z / sum_exp_z
+        
+        # return class_probs.T
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -116,29 +126,23 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         self.grads = []
-        loss = cross_entropy_loss(targets, outputs)
-        
-        grad_out = np.zeros(self.ws[1].shape)
-        grad_hidden = np.zeros(self.ws[0].shape)
-        for i in range(outputs.shape[0]):
-            # Calculate gradient of output layer
-            
-            delta2 = outputs[i] - targets[i]
-            grad_out += np.outer(self.hidden_layer_output[i], delta2)
-            
-            # Calculate gradient of hidden layer
-            sigma_prime = self.hidden_layer_output[i] * (1 - self.hidden_layer_output[i])
-            delta1 = self.ws[1].dot(delta2) * sigma_prime
-            grad_hidden += np.outer(X[i], delta1)
-            
-            
-        grad_out /= outputs.shape[0]
-        grad_hidden /= outputs.shape[0]
-        
-        # Append gradients to list
+                
+        # Calculate gradient of output layer
+        delta2 = outputs - targets  # Shape: (batch_size, output_size)
+        grad_out = np.einsum('bi,bj->ij', self.hidden_layer_output, delta2)  # Shape: (hidden_size, output_size)
+
+        # Calculate gradient of hidden layer
+        sigma_prime = self.hidden_layer_output * (1 - self.hidden_layer_output)  # Shape: (batch_size, hidden_size)
+        delta1 = np.dot(delta2, self.ws[1].T) * sigma_prime  # Shape: (batch_size, hidden_size)
+        grad_hidden = np.einsum('bi,bj->ij', X, delta1)  # Shape: (input_size, hidden_size)
+
+        # Take mean along batch axis
+        grad_out /= outputs.shape[0]  # Normalize by batch size
+        grad_hidden /= outputs.shape[0]  # Normalize by batch size
+
         self.grads.append(grad_hidden)
         self.grads.append(grad_out)
-                
+    
         for grad, w in zip(self.grads, self.ws):
             assert (
                 grad.shape == w.shape
