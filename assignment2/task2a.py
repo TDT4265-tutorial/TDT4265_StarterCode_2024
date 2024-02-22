@@ -118,22 +118,22 @@ class SoftmaxModel:
         self.grads = []
         loss = cross_entropy_loss(targets, outputs)
         
-                # Calculate gradient of output layer
-        delta2 = outputs - targets  # Shape: (batch_size, output_size)
-        grad_out = np.outer(self.hidden_layer_output.T, delta2).T  # Shape: (hidden_size, output_size)
-
-        # Calculate gradient of hidden layer
-        sigma_prime = self.hidden_layer_output * (1 - self.hidden_layer_output)  # Shape: (batch_size, hidden_size)
-        delta1 = np.dot(delta2, self.ws[1].T) * sigma_prime  # Shape: (batch_size, hidden_size)
-        grad_hidden = np.dot(X.T, delta1)  # Shape: (input_size, hidden_size)
-
-        # Normalize gradients
+        grad_out = np.zeros(self.ws[1].shape)
+        grad_hidden = np.zeros(self.ws[0].shape)
+        for i in range(outputs.shape[0]):
+            # Calculate gradient of output layer
+            
+            delta2 = outputs[i] - targets[i]
+            grad_out += np.outer(self.hidden_layer_output[i], delta2)
+            
+            # Calculate gradient of hidden layer
+            sigma_prime = self.hidden_layer_output[i] * (1 - self.hidden_layer_output[i])
+            delta1 = self.ws[1].dot(delta2) * sigma_prime
+            grad_hidden += np.outer(X[i], delta1)
+            
+            
         grad_out /= outputs.shape[0]
         grad_hidden /= outputs.shape[0]
-
-                        
-        print(grad_out.shape)
-        print(grad_hidden.shape)
         
         # Append gradients to list
         self.grads.append(grad_hidden)
