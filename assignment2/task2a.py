@@ -79,6 +79,11 @@ class SoftmaxModel:
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
+        
+        if self.use_improved_sigmoid:
+            self.sigmoid_activation_function = lambda x, i: 1.7159 * np.tanh(2/3 * self.ws[i].T.dot(x))
+        else:
+            self.sigmoid_activation_function = lambda x, i : 1/(1+np.exp(-self.ws[i].T.dot(x)))
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -92,15 +97,14 @@ class SoftmaxModel:
         # such as self.hidden_layer_output = ...
         
         # Hidden layer with sigmoid activation
-        if self.use_improved_sigmoid:
-            sigmoid_activation_function = lambda x: 1.7159 * np.tanh(2/3 * self.ws[0].T.dot(x))
-        else:
-            sigmoid_activation_function = lambda x: 1/(1+np.exp(-self.ws[0].T.dot(x)))
-
-        self.hidden_layer_output = np.apply_along_axis(sigmoid_activation_function, 1, X)
+        self.hidden_layer_output = [X]
+        
+        for i in range(len(self.ws)-1):
+            self.hidden_layer_output.append(np.apply_along_axis(self.sigmoid_activation_function, 1, X, i))
+            X = self.hidden_layer_output[-1]
         
         # Output layer with softmax activation
-        z = self.ws[1].T.dot(self.hidden_layer_output.T)
+        z = self.ws[-1].T.dot(self.hidden_layer_output[-1].T)
         exp_z = np.exp(z)
         sum_exp_z = np.sum(exp_z, axis=0)
         class_probs = exp_z / sum_exp_z
@@ -124,26 +128,35 @@ class SoftmaxModel:
         self.grads = []
                 
         # Calculate gradient of output layer
-        delta2 = outputs - targets  # Shape: (batch_size, output_size)
-        grad_out = np.einsum('bi,bj->ij', self.hidden_layer_output, delta2)  # Shape: (hidden_size, output_size)
-
-        # Calculate gradient of hidden layer
-        if self.use_improved_sigmoid:
-            hidden_layer_pre_activation_function = lambda x: self.ws[0].T.dot(x)
-            hidden_layer_pre_activation = np.apply_along_axis(hidden_layer_pre_activation_function, 1, X)
-            sigma_prime = 1.7159 * 2/3 * (1 - np.tanh(2/3 * hidden_layer_pre_activation)**2) # Shape: (batch_size, hidden_size)
-        else:
-            sigma_prime = self.hidden_layer_output * (1 - self.hidden_layer_output)  # Shape: (batch_size, hidden_size)
-        
-        delta1 = np.dot(delta2, self.ws[1].T) * sigma_prime  # Shape: (batch_size, hidden_size)
-        grad_hidden = np.einsum('bi,bj->ij', X, delta1)  # Shape: (input_size, hidden_size)
-
-        # Take mean along batch axis
-        grad_out /= outputs.shape[0]  # Normalize by batch size
-        grad_hidden /= outputs.shape[0]  # Normalize by batch size
-
-        self.grads.append(grad_hidden)
+        delta_k = outputs - targets 
+        grad_out = np.einsum('bi,bj->ij', self.hidden_layer_output[-1], delta_k) 
+        grad_out /= outputs.shape[0]  
         self.grads.append(grad_out)
+        
+        
+
+        # Calculate gradient of hidden layers
+        
+        delta_prev = delta_k
+        for i in range(len(self.ws)-2, -1, -1):
+            
+            if self.use_improved_sigmoid:
+                previous_layer_pre_activation_function = lambda x: self.ws[i].T.dot(x)
+                previous_layer_pre_activation = np.apply_along_axis(previous_layer_pre_activation_function, 1, self.hidden_layer_output[i])
+                
+                sigma_prime = 1.7159 * 2/3 * (1 - np.tanh(2/3 * previous_layer_pre_activation)**2)
+            else:
+                sigma_prime = self.hidden_layer_output[i+1] * (1 - self.hidden_layer_output[i+1]) 
+            
+            delta1 = np.dot(delta_prev, self.ws[i+1].T) * sigma_prime 
+                        
+            grad_hidden = np.einsum('bi,bj->ij', self.hidden_layer_output[i], delta1) 
+            grad_hidden /= outputs.shape[0] 
+            self.grads.append(grad_hidden)
+            
+            delta_prev = delta1
+            
+        self.grads = self.grads[::-1]
     
         for grad, w in zip(self.grads, self.ws):
             assert (
@@ -226,7 +239,7 @@ def main():
     ), f"Expected X_train to have 785 elements per image. Shape was: {X_train.shape}"
 
     neurons_per_layer = [64, 10]
-    use_improved_sigmoid = True
+    use_improved_sigmoid = False
     use_improved_weight_init = True
     use_relu = True
     model = SoftmaxModel(

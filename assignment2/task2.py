@@ -96,18 +96,30 @@ class SoftmaxTrainer(BaseTrainer):
 
 def main():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    num_epochs=50
-    learning_rate=0.1
-    batch_size=32
-    neurons_per_layer=[64, 10]
-    momentum_gamma=0.9  # Task 3 hyperparameter
-    shuffle_data=True
+    # num_epochs=50
+    # learning_rate=0.1
+    # batch_size=32
+    # neurons_per_layer=[64, 10]
+    # momentum_gamma=0.9  # Task 3 hyperparameter
+    # shuffle_data=True
 
-    # Settings for task 2 and 3. Keep all to false for task 2.
-    use_improved_sigmoid=True
-    use_improved_weight_init=True
-    use_momentum=False
-    use_relu=False
+    # # Settings for task 2 and 3. Keep all to false for task 2.
+    # use_improved_sigmoid=True
+    # use_improved_weight_init=True
+    # use_momentum=False
+    # use_relu=False
+    
+    num_epochs = 50
+    learning_rate = .1
+    batch_size = 32
+    neurons_per_layer = [64, 10]
+    momentum_gamma = .9  # Task 3 hyperparameter
+    shuffle_data = True
+
+    use_improved_sigmoid = True
+    use_improved_weight_init = True
+    use_momentum = True
+    use_relu = False
 
     # Load dataset
     X_train, Y_train, X_val, Y_val=utils.load_full_mnist()

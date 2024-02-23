@@ -90,22 +90,22 @@ class BaseTrainer:
                     # TODO: Implement early stopping (copy from last assignment)
                     
                     # == # Early stopping # == #
-                    if global_step / num_steps_per_val > 50:
-                        current_check = val_history["loss"][global_step - 50 * num_steps_per_val]
+                    if global_step / num_steps_per_val > 100:
+                        current_check = val_history["loss"][global_step - 100 * num_steps_per_val]
                         
-                        for i in range(49, -1, -1):
+                        for i in range(99, -1, -1): # Changed early stopping to 100 steps
                             if val_history["loss"][global_step - i * num_steps_per_val] < current_check:
                                 break
                             if i == 0:
                                 print("Early stopping, step: ", global_step)
                                 print("Early stopping, epoch: ", epoch)
-                                ## Remove the last 50 steps from the history
-                                for i in range(50):
+                                ## Remove the last 100 steps from the history
+                                for i in range(100):
                                     val_history["loss"].pop(global_step - i * num_steps_per_val)
                                     val_history["accuracy"].pop(global_step - i * num_steps_per_val)
                                     train_history["accuracy"].pop(global_step - i * num_steps_per_val)
-                                # Clear the training history from global_step - 50 * num_steps_per_val
-                                for i in range(50 * num_steps_per_val):
+                                # Clear the training history from global_step - 100 * num_steps_per_val
+                                for i in range(100 * num_steps_per_val):
                                     train_history["loss"].pop(global_step - i)
                                
                                 return train_history, val_history

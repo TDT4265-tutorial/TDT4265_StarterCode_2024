@@ -1,7 +1,8 @@
+import numpy as np
 import utils
 import matplotlib.pyplot as plt
 from task2a import pre_process_images, one_hot_encode, SoftmaxModel
-from task2 import SoftmaxTrainer
+from task2 import SoftmaxTrainer, calculate_accuracy
 
 
 def main():
@@ -35,10 +36,14 @@ def main():
         model, learning_rate, batch_size, shuffle_data,
         X_train, Y_train, X_val, Y_val,
     )
+    
+    for i in range(2):
+        model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
+    
     train_history, val_history = trainer.train(num_epochs)
     
-    print(val_history["accuracy"][-1])
-    print(val_history["loss"][-1])
+    print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
+    print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
 
     # Example created for comparing with and without shuffling.
     # For comparison, show all loss/accuracy curves in the same plot
