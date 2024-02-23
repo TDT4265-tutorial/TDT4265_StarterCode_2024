@@ -60,7 +60,7 @@ class SoftmaxTrainer(BaseTrainer):
         self.model.backward(X_batch, logits, Y_batch)
         
         # Gradient Descent
-        for layer_idx in range(2):
+        for layer_idx in range(len(self.model.ws)):
             grad = self.model.grads[layer_idx]
             if self.use_momentum:
                 grad = self.momentum_gamma * self.previous_grads[layer_idx] + grad
@@ -112,7 +112,7 @@ def main():
     num_epochs = 50
     learning_rate = .1
     batch_size = 32
-    neurons_per_layer = [64, 10]
+    neurons_per_layer = [64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 10]
     momentum_gamma = .9  # Task 3 hyperparameter
     shuffle_data = True
 

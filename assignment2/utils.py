@@ -93,3 +93,4 @@ def plot_loss(loss_dict: dict, label: str = None, npoints_to_average=1, plot_var
         steps, np.array(mean_loss) -
         np.array(loss_std), np.array(mean_loss) + loss_std,
         alpha=.2, label=f"{label} variance over {npoints_to_average} steps")
+
