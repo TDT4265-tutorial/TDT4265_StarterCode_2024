@@ -36,12 +36,15 @@ def main():
         X_train, Y_train, X_val, Y_val,
     )
     train_history, val_history = trainer.train(num_epochs)
+    
+    print(val_history["accuracy"][-1])
+    print(val_history["loss"][-1])
 
     # Example created for comparing with and without shuffling.
     # For comparison, show all loss/accuracy curves in the same plot
     # YOU CAN DELETE EVERYTHING BELOW!
 
-    shuffle_data = False
+    use_improved_weight_init = True
 
     # Train a new model with new parameters
     model_no_shuffle = SoftmaxModel(
@@ -54,26 +57,68 @@ def main():
         model_no_shuffle, learning_rate, batch_size, shuffle_data,
         X_train, Y_train, X_val, Y_val,
     )
-    train_history_no_shuffle, val_history_no_shuffle = trainer_shuffle.train(
+    train_history_improved_weights, val_history_improved_weights = trainer_shuffle.train(
         num_epochs)
 
-    plt.subplot(1, 2, 1)
-    utils.plot_loss(train_history["loss"],
-                    "Task 2 Model", npoints_to_average=10)
-    utils.plot_loss(
-        train_history_no_shuffle["loss"], "Task 2 Model - No dataset shuffling", npoints_to_average=10)
-    plt.ylim([0, .4])
-    plt.subplot(1, 2, 2)
-    plt.ylim([0.85, .95])
-    utils.plot_loss(val_history["accuracy"], "Task 2 Model")
-    utils.plot_loss(
-        val_history_no_shuffle["accuracy"], "Task 2 Model - No Dataset Shuffling")
-    plt.ylabel("Validation Accuracy")
-    plt.legend()
-    plt.show()
-        use_improved_weight_init,
-    labels.append(
+    use_improved_sigmoid = True
 
+    # Train a new model with new parameters
+    model_no_shuffle = SoftmaxModel(
+        neurons_per_layer,
+        use_improved_sigmoid,
+        use_improved_weight_init,
+        use_relu)
+    trainer_shuffle = SoftmaxTrainer(
+        momentum_gamma, use_momentum,
+        model_no_shuffle, learning_rate, batch_size, shuffle_data,
+        X_train, Y_train, X_val, Y_val,
+    )
+    train_history_improved_sig, val_history_improved_sig = trainer_shuffle.train(
+        num_epochs)
+    
+    use_momentum = True
+    learning_rate = 0.02
+
+    # Train a new model with new parameters
+    model_no_shuffle = SoftmaxModel(
+        neurons_per_layer,
+        use_improved_sigmoid,
+        use_improved_weight_init,
+        use_relu)
+    trainer_shuffle = SoftmaxTrainer(
+        momentum_gamma, use_momentum,
+        model_no_shuffle, learning_rate, batch_size, shuffle_data,
+        X_train, Y_train, X_val, Y_val,
+    )
+    train_history_momentum, val_history_momentum = trainer_shuffle.train(
+        num_epochs)
+    
+    # Make 2 plots one with loss and one with accuracy comparing all 4 netwroks
+    plt.figure(figsize=(20, 12))
+    plt.subplot(1, 2, 1)
+    plt.ylim([0.0, 0.99])
+    utils.plot_loss(val_history["loss"], "Validation Loss no improvements")
+    utils.plot_loss(val_history_improved_weights["loss"], "Validation Loss adding improved weights")
+    utils.plot_loss(val_history_improved_sig["loss"], "Validation Loss adding improved sigmoid")
+    utils.plot_loss(val_history_momentum["loss"], "Validation Loss adding momentum")
+    plt.legend()
+    plt.xlabel("Number of Training Steps")
+    plt.ylabel("Cross Entropy Loss - Average")
+    # Plot accuracy
+    plt.subplot(1, 2, 2)
+    plt.ylim([0.8, 0.99])
+    utils.plot_loss(val_history["accuracy"], "Validation Accuracy no improovements")
+    utils.plot_loss(val_history_improved_weights["accuracy"], "Validation Accuracy adding improved weights")
+    utils.plot_loss(val_history_improved_sig["accuracy"], "Validation Accuracy adding improved sigmoid")
+    utils.plot_loss(val_history_momentum["accuracy"], "Validation Accuracy adding momentum")
+    plt.xlabel("Number of Training Steps")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.savefig("task3_train_loss.png")
+    plt.show()
+    
+
+   
 
 if __name__ == "__main__":
     main()

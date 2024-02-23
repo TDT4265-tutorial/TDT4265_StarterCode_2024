@@ -72,7 +72,10 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            if use_improved_weight_init:
+                w = np.random.normal(0, 1/np.sqrt(prev), w_shape)
+            else:
+                w = np.zeros(w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
@@ -89,26 +92,19 @@ class SoftmaxModel:
         # such as self.hidden_layer_output = ...
         
         # Hidden layer with sigmoid activation
-        sigmoid_activation_function = lambda x: 1/(1+np.exp(-self.ws[0].T.dot(x)))
-        self.hidden_layer_output = np.apply_along_axis(sigmoid_activation_function, 1, X)
+        if self.use_improved_sigmoid:
+            sigmoid_activation_function = lambda x: 1.7159 * np.tanh(2/3 * self.ws[0].T.dot(x))
+        else:
+            sigmoid_activation_function = lambda x: 1/(1+np.exp(-self.ws[0].T.dot(x)))
 
-        assert self.hidden_layer_output.shape[1] == self.neurons_per_layer[0], f"Hidden layer shape: {self.hidden_layer_output.shape[1]}, should be {self.neurons_per_layer[0]}"
+        self.hidden_layer_output = np.apply_along_axis(sigmoid_activation_function, 1, X)
         
         # Output layer with softmax activation
         z = self.ws[1].T.dot(self.hidden_layer_output.T)
-
         exp_z = np.exp(z)
         sum_exp_z = np.sum(exp_z, axis=0)
-        
         class_probs = exp_z / sum_exp_z
         return class_probs.T
-        
-        # z = self.ws[1].T.dot(self.hidden_layer_output.T)
-        # exp_z = np.exp(z)
-        # sum_exp_z = np.sum(exp_z, axis=0)
-        # class_probs = exp_z / sum_exp_z
-        
-        # return class_probs.T
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -132,7 +128,13 @@ class SoftmaxModel:
         grad_out = np.einsum('bi,bj->ij', self.hidden_layer_output, delta2)  # Shape: (hidden_size, output_size)
 
         # Calculate gradient of hidden layer
-        sigma_prime = self.hidden_layer_output * (1 - self.hidden_layer_output)  # Shape: (batch_size, hidden_size)
+        if self.use_improved_sigmoid:
+            hidden_layer_pre_activation_function = lambda x: self.ws[0].T.dot(x)
+            hidden_layer_pre_activation = np.apply_along_axis(hidden_layer_pre_activation_function, 1, X)
+            sigma_prime = 1.7159 * 2/3 * (1 - np.tanh(2/3 * hidden_layer_pre_activation)**2) # Shape: (batch_size, hidden_size)
+        else:
+            sigma_prime = self.hidden_layer_output * (1 - self.hidden_layer_output)  # Shape: (batch_size, hidden_size)
+        
         delta1 = np.dot(delta2, self.ws[1].T) * sigma_prime  # Shape: (batch_size, hidden_size)
         grad_hidden = np.einsum('bi,bj->ij', X, delta1)  # Shape: (input_size, hidden_size)
 

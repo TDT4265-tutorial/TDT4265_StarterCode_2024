@@ -18,8 +18,11 @@ def calculate_accuracy(
     Returns:
         Accuracy (float)
     """
-    # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    outputs = model.forward(X)
+    outputs = np.argmax(outputs, axis=1)
+    targets = np.argmax(targets, axis=1)
+    accuracy = np.sum(outputs == targets) / targets.shape[0]
+    
     return accuracy
 
 
@@ -53,13 +56,21 @@ class SoftmaxTrainer(BaseTrainer):
         """
         # TODO: Implement this function (task 2c)
 
-        loss = 0
-
-        # self.model.ws[layer_idx] = (
-        #         self.model.ws[layer_idx] - self.learning_rate * grad
-        # loss=cross_entropy_loss(Y_batch, logits)  # sol
-
-        # return loss
+        logits = self.model.forward(X_batch)
+        self.model.backward(X_batch, logits, Y_batch)
+        
+        # Gradient Descent
+        for layer_idx in range(2):
+            grad = self.model.grads[layer_idx]
+            if self.use_momentum:
+                grad = self.momentum_gamma * self.previous_grads[layer_idx] + grad
+                self.model.ws[layer_idx] = self.model.ws[layer_idx] - self.learning_rate * grad
+                
+                self.previous_grads[layer_idx] = grad
+            else:
+                self.model.ws[layer_idx] = self.model.ws[layer_idx] - self.learning_rate * grad
+             
+        return cross_entropy_loss(Y_batch, logits)
 
     def validation_step(self):
         """
@@ -93,8 +104,8 @@ def main():
     shuffle_data=True
 
     # Settings for task 2 and 3. Keep all to false for task 2.
-    use_improved_sigmoid=False
-    use_improved_weight_init=False
+    use_improved_sigmoid=True
+    use_improved_weight_init=True
     use_momentum=False
     use_relu=False
 
@@ -121,6 +132,11 @@ def main():
         X_val,
         Y_val,
     )
+    
+    # # Set weights to randomly samples weights in [-1,1]
+    # for i in range(2):
+    #     model.ws[i] = np.random.uniform(-1, 1, size=model.ws[i].shape)
+        
     train_history, val_history=trainer.train(num_epochs)
 
     print(
