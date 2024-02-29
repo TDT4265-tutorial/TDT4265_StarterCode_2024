@@ -20,23 +20,63 @@ class ExampleModel(nn.Module):
         self.num_classes = num_classes
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
+            #layer1
             nn.Conv2d(
                 in_channels=image_channels,
                 out_channels=num_filters,
                 kernel_size=5,
                 stride=1,
                 padding=2,
-            )
+            ),
+            """
+            After this layer the output of feature_extractor would be [batch_size, num_filters, 32, 32]
+            maxpool with stride=2 will half the size of the output (from 32L and 32 W to 16L and 16W)
+            After the MaxPool2d layer the output of feature_extractor would be [batch_size, num_filters, 16, 16]
+            that means after both the first convv and Pool layer  we would have:
+            self.num_output_features = 32 * 16 * 16
+            """
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU(),
+
+            #layer2
+            nn.Conv2d(in_channels=num_filters, #equal to the output from prev layer
+                out_channels=num_filters * 2,
+                kernel_size=5,
+                stride=1,
+                padding=2,
+            ),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU()
+            #After this layer the output of feature_extractor would be [batch_size, num_filters * 2, 8, 8]
+
+            #layer3
+            nn.Conv2d(in_channels=num_filters * 2,
+                out_channels=num_filters * 4,
+                kernel_size=5,
+                stride=1,
+                padding=2,
+            ),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.ReLU()
+            #After this layer the output of feature_extractor would be [batch_size, num_filters * 4, 4, 4]
+
+        
         )
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32 * 32 * 32
+        #The output of feature_extractor will be [batch_size, num_filters * 4, 4, 4]
+
+        self.num_output_features = (num_filters * 4) * 4 * 4
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
-        # Outputs num_classes predictions, 1 for each class.
+        # Outputs num_classes predictions, 1 for each class. 
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
+
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
+            nn.Flatten(),
+            nn.Linear(self.num_output_features, num_filters * 2),
+            nn.ReLU(),
+            nn.Linear(num_filters * 2, num_classes),
+
         )
 
     def forward(self, x):
@@ -46,8 +86,11 @@ class ExampleModel(nn.Module):
             x: Input image, shape: [batch_size, 3, 32, 32]
         """
         # TODO: Implement this function (Task  2a)
+        features = self.feature_extractor(x)
+        #make sure to flatten/reshape/view inbetween Convolution(feature_extract) and fullyconnected (classification) 
+        out = self.classifier(features)
+        
         batch_size = x.shape[0]
-        out = x
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (
             batch_size,
