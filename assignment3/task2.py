@@ -1,6 +1,7 @@
 import pathlib
 import matplotlib.pyplot as plt
 import utils
+import torch
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
