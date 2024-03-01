@@ -43,6 +43,7 @@ def compute_loss_and_accuracy(
             max_val, max_val_index = output_probs.max(dim=1)
             batch_accuracy = (max_val_index == Y_batch).sum().item() / len(Y_batch)
             accuracy += batch_accuracy
+            num_batches+=1
     #Compute average loss and accuracy
     average_loss /= num_batches
     accuracy /= num_batches

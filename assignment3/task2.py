@@ -19,6 +19,13 @@ class ExampleModel(nn.Module):
         num_filters = 32  # Set number of filters in first conv layer
         self.num_classes = num_classes
         # Define the convolutional layers
+        """
+            After the first layer the output of feature_extractor would be [batch_size, num_filters, 32, 32]
+            maxpool with stride=2 will half the size of the output (from 32L and 32 W to 16L and 16W)
+            After the MaxPool2d layer the output of feature_extractor would be [batch_size, num_filters, 16, 16]
+            that means after both the first convv and Pool layer  we would have:
+            self.num_output_features = 32 * 16 * 16
+        """
         self.feature_extractor = nn.Sequential(
             #layer1
             nn.Conv2d(
@@ -28,13 +35,6 @@ class ExampleModel(nn.Module):
                 stride=1,
                 padding=2,
             ),
-            """
-            After this layer the output of feature_extractor would be [batch_size, num_filters, 32, 32]
-            maxpool with stride=2 will half the size of the output (from 32L and 32 W to 16L and 16W)
-            After the MaxPool2d layer the output of feature_extractor would be [batch_size, num_filters, 16, 16]
-            that means after both the first convv and Pool layer  we would have:
-            self.num_output_features = 32 * 16 * 16
-            """
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.ReLU(),
 
@@ -46,7 +46,7 @@ class ExampleModel(nn.Module):
                 padding=2,
             ),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU()
+            nn.ReLU(),
             #After this layer the output of feature_extractor would be [batch_size, num_filters * 2, 8, 8]
 
             #layer3
