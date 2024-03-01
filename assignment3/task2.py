@@ -144,7 +144,7 @@ def main():
     train_loss, train_accuracy = compute_loss_and_accuracy(dataloaders[0], model, torch.nn.CrossEntropyLoss())
     val_loss, val_accuracy = compute_loss_and_accuracy(dataloaders[1], model, torch.nn.CrossEntropyLoss())
     test_loss, test_accuracy = compute_loss_and_accuracy(dataloaders[2], model, torch.nn.CrossEntropyLoss())
-    # Print the results
+    #Print the results
     print(f"Training Loss: {train_loss:.4f}, Training Accuracy: {train_accuracy:.4f}")
     print(f"Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}")
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}")
