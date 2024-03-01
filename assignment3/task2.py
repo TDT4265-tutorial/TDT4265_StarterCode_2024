@@ -111,6 +111,7 @@ def create_plots(trainer: Trainer, name: str):
     )
     utils.plot_loss(trainer.validation_history["loss"], label="Validation loss")
     plt.legend()
+
     plt.subplot(1, 2, 2)
     plt.title("Accuracy")
     utils.plot_loss(trainer.validation_history["accuracy"], label="Validation Accuracy")
