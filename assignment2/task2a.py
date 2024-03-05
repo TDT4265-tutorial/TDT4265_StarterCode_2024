@@ -71,8 +71,8 @@ class SoftmaxModel:
         self.neurons_per_layer = neurons_per_layer
 
         # Initialize the weights
-        self.hidden_layer_z = [None for i in range(1+ len(neurons_per_layer))]
-        self.hidden_layer_a = [None for i in range(1+ len(neurons_per_layer))]
+        self.hidden_layer_z = [None for i in range(len(neurons_per_layer) + 1)]
+        self.hidden_layer_a = [None for i in range(len(neurons_per_layer) + 1)]
         self.ws = []
         prev = self.I
         print(self.neurons_per_layer)
@@ -84,7 +84,7 @@ class SoftmaxModel:
             else:
                 w = np.random.uniform(-1, 1, w_shape) 
             self.ws.append(w)
-            prev = size + 1
+            prev = size
         self.grads = [None for i in range(len(self.ws))]
 
     def forward(self, X: np.ndarray) -> np.ndarray:
@@ -99,21 +99,14 @@ class SoftmaxModel:
         # such as self.hidden_layer_output = ...
         #print("Input: ", X.shape)
         
-        a_i = X
         self.hidden_layer_a[0] = X
         for i, w in enumerate(self.ws):
+            self.hidden_layer_z[i+1] = self.hidden_layer_a[i].dot(w)
             if i + 1 == len(self.ws):
-                self.hidden_layer_z[i+1] = np.c_[self.hidden_layer_a[i], 
-                                                 np.ones(len(self.hidden_layer_a[i]))].dot(w)
                 output_e = np.exp(self.hidden_layer_z[i+1])
                 sum = np.sum(output_e, axis=1)
                 self.hidden_layer_a[i+1] = output_e/sum[:, None]
             else:
-                if i == 0:
-                    self.hidden_layer_z[i+1] = self.hidden_layer_a[i].dot(w)
-                else:
-                    self.hidden_layer_z[i+1] = np.c_[self.hidden_layer_a[i], 
-                                                 np.ones(len(self.hidden_layer_a[i]))].dot(w)
                 if self.use_improved_sigmoid:
                     self.hidden_layer_a[i+1] = 1.7159 * np.tanh((2/3) * self.hidden_layer_z[i+1])
                 else:
@@ -165,7 +158,7 @@ class SoftmaxModel:
                     f_derivative = 1.7159 * (2/3) * (1 - np.tanh((2/3) * self.hidden_layer_z[i])**2)
                 else:
                     f_derivative = sigmoid(self.hidden_layer_z)*(1-sigmoid(self.hidden_layer_z[i]))
-                delta_prev = f_derivative * wd[:, :len(wd[0])-1]
+                delta_prev = f_derivative * wd
 
 
         #print("Shape of stuff", grad_1.shape)
@@ -173,12 +166,12 @@ class SoftmaxModel:
         # For example, self.grads[0] will be the gradient for the first hidden layer
 
 
-        '''
+        
         for grad, w in zip(self.grads, self.ws):
             assert (
                 grad.shape == w.shape
             ), f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
-        '''
+        
 
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
