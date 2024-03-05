@@ -95,10 +95,11 @@ class SoftmaxTrainer(BaseTrainer):
 
 def create_trainers():
     # hyperparameters DO NOT CHANGE IF NOT SPECIFIED IN ASSIGNMENT TEXT
-    learning_rate = .1
+    num_epochs = 50
+    learning_rate = 0.1
     batch_size = 32
     neurons_per_layer = [64, 10]
-    momentum_gamma = .9  # Task 3 hyperparameter
+    momentum_gamma = 0.9  # Task 3 hyperparameter
     shuffle_data = True
     use_relu = False
 
@@ -139,6 +140,7 @@ def create_trainers():
         momentum_gamma, use_momentum,
         model_1, learning_rate, batch_size, shuffle_data,
         X_train, Y_train, X_val, Y_val,
+
     )
 
     use_improved_sigmoid = True
