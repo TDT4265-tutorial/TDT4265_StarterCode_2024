@@ -16,46 +16,49 @@ class ExampleModel(nn.Module):
         """
         super().__init__()
         # TODO: Implement this function (Task  2a)
-        num_filters_1 = 32  # Set number of filters in first conv layer
-        num_filters_2 = 64
-        num_filters_3 = 128
+        num_filters_1 = 256  # Set number of filters in first conv layer
+        num_filters_2 = num_filters_1 * 2
+        num_filters_3 = num_filters_2 * 2
+        kernel_size = 3
+        padding_size = kernel_size // 2
         self.num_classes = num_classes
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(
                 in_channels=image_channels,
                 out_channels=num_filters_1,
-                kernel_size=5,
+                kernel_size=kernel_size,
                 stride=1,
-                padding=2,
+                padding=padding_size,
             ),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(
                 in_channels=num_filters_1,
                 out_channels=num_filters_2,
-                kernel_size=5,
+                kernel_size=kernel_size,
                 stride=1,
-                padding=2,
+                padding=padding_size,
             ),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
             nn.Conv2d(
                 in_channels=num_filters_2,
                 out_channels=num_filters_3,
-                kernel_size=5,
+                kernel_size=kernel_size,
                 stride=1,
-                padding=2,
+                padding=padding_size,
             ),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.Flatten()
+            nn.Flatten(),
+            nn.Dropout(0.5),
         )
-        
-        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 2048
 
-        mid_features = 64
+        # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
+        self.num_output_features = num_filters_3*4*4
+
+        mid_features = 80
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
