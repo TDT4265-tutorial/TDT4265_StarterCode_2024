@@ -8,6 +8,8 @@ We ask you to follow this rule when using the computers:
 
 # Working remotly via SSH (18:00 - 08:00 only!)
 
+Note that you need to be connected to the NTNU VPN if you are outside the NTNU local network for the connection to be successful. Se this link for information about the VPN: https://i.ntnu.no/wiki/-/wiki/English/Install+vpn
+
 You are also allowed to use the Cybele computers remotely using SSH. 
 
 To log into the nodes via ssh you can use the following command in the terminal:
