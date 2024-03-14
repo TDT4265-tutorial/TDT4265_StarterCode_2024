@@ -1,3 +1,4 @@
+
 import pathlib
 import matplotlib.pyplot as plt
 import utils
@@ -5,9 +6,14 @@ import torch
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
+from torchsummary import summary
 
 
-class ExampleModel(nn.Module):
+##Task 3a
+#Model from task2 copied as a starting point
+
+
+class Task3Model(nn.Module):
     def __init__(self, image_channels, num_classes):
         """
         Is called when model is initialized.
@@ -17,7 +23,7 @@ class ExampleModel(nn.Module):
         """
         super().__init__()
         # TODO: Implement this function (Task  2a)
-        num_filters = 32  # Set number of filters in first conv layer
+        num_filters = 64  # Set number of filters in first conv layer
         self.num_classes = num_classes
         # Define the convolutional layers
         """
@@ -26,46 +32,105 @@ class ExampleModel(nn.Module):
             After the MaxPool2d layer the output of feature_extractor would be [batch_size, num_filters, 16, 16]
             that means after both the first convv and Pool layer  we would have:
             self.num_output_features = 32 * 16 * 16
+
+            Formula for output size of conv layer:
+            Width :
+            W2 = [(W1 -FW + 2PW )/SW ] + 1
         """
+
         self.feature_extractor = nn.Sequential(
             #layer1
             nn.Conv2d(
                 in_channels=image_channels,
                 out_channels=num_filters,
-                kernel_size=5,
+                kernel_size=3,
                 stride=1,
-                padding=2,
+                padding=1,
             ),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU(),
-
+            nn.BatchNorm2d(num_filters),
+            nn.ELU(),
             #layer2
-            nn.Conv2d(in_channels=num_filters, #equal to the output from prev layer
-                out_channels=num_filters * 2,
-                kernel_size=5,
+            nn.Conv2d(
+                in_channels=num_filters,
+                out_channels=num_filters,
+                kernel_size=3,
                 stride=1,
-                padding=2,
+                padding=1,
             ),
+            nn.BatchNorm2d(num_filters),
+            nn.ELU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU(),
-            #After this layer the output of feature_extractor would be [batch_size, num_filters * 2, 8, 8]
 
             #layer3
-            nn.Conv2d(in_channels=num_filters * 2,
-                out_channels=num_filters * 4,
-                kernel_size=5,
+            nn.Conv2d(
+                in_channels=num_filters,
+                out_channels=num_filters*2,
+                kernel_size=3,
                 stride=1,
-                padding=2,
+                padding=1,
             ),
+            nn.BatchNorm2d(num_filters*2),
+            nn.ELU(),
+            #layer4
+            nn.Conv2d(
+                in_channels=num_filters*2,
+                out_channels=num_filters*2,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.BatchNorm2d(num_filters*2),
+            nn.ELU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
-            nn.ReLU()
+            #layer5
+            nn.Conv2d(
+                in_channels=num_filters*2,
+                out_channels=num_filters*4,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.BatchNorm2d(num_filters*4),
+            nn.ELU(),
+            #layer6
+            nn.Conv2d(
+                in_channels=num_filters*4,
+                out_channels=num_filters*4,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.BatchNorm2d(num_filters*4),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
             #After this layer the output of feature_extractor would be [batch_size, num_filters * 4, 4, 4]
 
-        
+            #layer7
+            nn.Conv2d(
+                in_channels=num_filters*4,
+                out_channels=num_filters*8,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.BatchNorm2d(num_filters*8),
+            nn.ELU(),
+            nn.Dropout(0.4), #p = 0.4 best score for now, with 64 filters
+
+            #layer8
+            nn.Conv2d(
+                in_channels=num_filters*8,
+                out_channels=num_filters*8,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+            ),
+            nn.BatchNorm2d(num_filters*8),
+            nn.ELU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
         )
         #The output of feature_extractor will be [batch_size, num_filters * 4, 4, 4]
-
-        self.num_output_features = (num_filters * 4) * 4 * 4
+        self.num_output_features = num_filters * 8 * 2 * 2  
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class. 
@@ -74,8 +139,10 @@ class ExampleModel(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Flatten(),
+            #layer9
             nn.Linear(self.num_output_features, num_filters * 2),
-            nn.ReLU(),
+            nn.ELU(),
+            #layer10
             nn.Linear(num_filters * 2, num_classes),
 
         )
@@ -133,18 +200,19 @@ def main():
     learning_rate = 5e-2
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = ExampleModel(image_channels=3, num_classes=10)
+    model = Task3Model(image_channels=3, num_classes=10)
     trainer = Trainer(
         batch_size, learning_rate, early_stop_count, epochs, model, dataloaders
     )
     trainer.train()
-    create_plots(trainer, "task2")
+    create_plots(trainer, "task3_model")
+    summary(model, (3, 32, 32))
 
     #try task 2b
     train_loss, train_accuracy = compute_loss_and_accuracy(dataloaders[0], model, torch.nn.CrossEntropyLoss())
     val_loss, val_accuracy = compute_loss_and_accuracy(dataloaders[1], model, torch.nn.CrossEntropyLoss())
     test_loss, test_accuracy = compute_loss_and_accuracy(dataloaders[2], model, torch.nn.CrossEntropyLoss())
-    #Print the results
+    # Print the results
     print(f"Training Loss: {train_loss:.4f}, Training Accuracy: {train_accuracy:.4f}")
     print(f"Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}")
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}")

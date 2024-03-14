@@ -22,12 +22,14 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images to 224x224
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
     ])
     transform_test = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images to 224x224
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
@@ -70,18 +72,19 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
 
 
 
-
 def load_cifar10_with_data_augmentation(batch_size: int, validation_fraction: float = 0.1
                  ) -> typing.List[torch.utils.data.DataLoader]:
     # Note that transform train will apply the same transform for
     # validation!
     transform_train = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images to 224x224
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(10),
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
     ])
     transform_test = transforms.Compose([
+        transforms.Resize((224, 224)),  # Resize images to 224x224
         transforms.ToTensor(),
         transforms.Normalize(mean, std)
     ])
