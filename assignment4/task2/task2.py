@@ -16,11 +16,22 @@ def calculate_iou(prediction_box, gt_box):
             float: value of the intersection of union for the two boxes.
     """
     # YOUR CODE HERE
+    x_intersect1 = gt_box[2] - prediction_box[0]
+    x_intersect2 = prediction_box[2] - gt_box[0]
+    y_intersect1 = gt_box[3] - prediction_box[1]
+    y_intersect2 = prediction_box[3] - gt_box[1]
 
+    # Check if they don't overlap at all
+    if min(x_intersect1, x_intersect2, y_intersect1, y_intersect2) < 0:
+        return 0
     # Compute intersection
+    x_overlap = min(x_intersect2, x_intersect1)
+    y_overlap = min(y_intersect1, y_intersect2)
 
+    intersect = x_overlap*y_overlap
+    union = (prediction_box[2] - prediction_box[0])*(prediction_box[3] - prediction_box[1]) + (gt_box[2] - gt_box[0])*(gt_box[3] - gt_box[1]) - intersect
     # Compute union
-    iou = 0
+    iou = intersect/union
     assert iou >= 0 and iou <= 1
     return iou
 
@@ -36,6 +47,9 @@ def calculate_precision(num_tp, num_fp, num_fn):
     Returns:
         float: value of precision
     """
+    if num_tp + num_fp == 0:
+        return 1
+    return num_tp/(num_tp+num_fp)
     raise NotImplementedError
 
 
@@ -49,6 +63,9 @@ def calculate_recall(num_tp, num_fp, num_fn):
     Returns:
         float: value of recall
     """
+    if num_tp + num_fn == 0:
+        return 0
+    return num_tp/(num_tp+num_fn)
     raise NotImplementedError
 
 
@@ -73,6 +90,37 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, ymin, xmax, ymax]
     """
     # Find all possible matches with a IoU >= iou threshold
+    iou_stats = np.zeros((gt_boxes.shape[0], gt_boxes.shape[0]))
+    for i in range(prediction_boxes.shape[0]):
+        for j in range(gt_boxes.shape[0]):
+            iou_stats[i, j] ==calculate_iou(prediction_boxes[i], gt_boxes[j])
+    
+    matches = []
+    while True:
+        bestMach = 0
+        if iou_stats.shape == (1, 1):
+            bestMach = [0, 0]
+        elif iou_stats.shape == (0, 0):
+            break
+        else:
+            bestMach = np.argmax(iou_stats, axis=-1)
+            print(f'{iou_stats.shape=}\n{bestMach=}')
+        if iou_stats[bestMach[0], bestMach[1]] < iou_threshold:
+            break
+        matches.append(bestMach)
+        iou_stats[bestMach[0], :] = 0
+        iou_stats[:, bestMach[1]] = 0
+    
+    out_pred = np.zeros((len(matches), 4))
+    out_gt = np.zeros((len(matches), 4))
+
+    k = 0
+    for (i, j) in matches:
+        out_pred[k] = prediction_boxes[i]
+        out_gt[k] = gt_boxes[j]
+        k += 1
+
+    return out_pred, out_gt
 
 
     # Sort all matches on IoU in descending order
