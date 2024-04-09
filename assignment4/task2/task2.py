@@ -248,7 +248,6 @@ def get_precision_recall_curve(
 
     precisions = [] 
     recalls = []
-
     for ct in confidence_thresholds:
         prediction_boxes_subset = [np.array([all_prediction_boxes[j][i] for i in range(len(all_prediction_boxes[j])) if confidence_scores[j][i] >= ct]) for j in range(len(all_prediction_boxes))]
         #print(f'{prediction_boxes_subset=}')
@@ -290,6 +289,7 @@ def calculate_mean_average_precision(precisions, recalls):
     """
     # Calculate the mean average precision given these recall levels.
     recall_levels = np.linspace(1.0, 0.0, 11)
+    '''
     recalls = np.flip(recalls)
     precisions = np.flip(precisions)
     print(f'{precisions=}')
@@ -297,6 +297,7 @@ def calculate_mean_average_precision(precisions, recalls):
 
     print(f'{np.all(np.diff(recalls) >= 0)=}')
     '''
+    
     new_recals = [1] + [i for i in recalls]
     new_precisions = [0] + [i for i in precisions]
     print(f'{new_precisions=}')
@@ -327,11 +328,11 @@ def calculate_mean_average_precision(precisions, recalls):
         else:
             average_precision += new_precisions[current_index]
     average_precision /= 11
-    '''
+    
 
-    interp = np.interp(recall_levels, recalls, precisions, right=0)
+    #interp = np.interp(recall_levels, recalls, precisions, right=0)
     #interp = np.interp(recall_levels, recalls, precisions)
-    average_precision = sum(interp)/11
+    #average_precision = sum(interp)/11
     return average_precision
 
 
