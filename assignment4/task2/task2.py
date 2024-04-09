@@ -289,13 +289,19 @@ def calculate_mean_average_precision(precisions, recalls):
         float: mean average precision
     """
     # Calculate the mean average precision given these recall levels.
+    recall_levels = np.linspace(1.0, 0.0, 11)
+    recalls = np.flip(recalls)
+    precisions = np.flip(precisions)
+    print(f'{precisions=}')
+    print(f'\n{recalls=}')
+
+    print(f'{np.all(np.diff(recalls) >= 0)=}')
+    '''
     new_recals = [1] + [i for i in recalls]
     new_precisions = [0] + [i for i in precisions]
+    print(f'{new_precisions=}')
+    print(f'\n{new_recals=}')
 
-    # print(f'{new_precisions=}')
-    # print(f'\n{new_recals=}')
-
-    recall_levels = np.linspace(1.0, 0, 11)
     current_p = new_precisions[0]
     
 
@@ -321,6 +327,11 @@ def calculate_mean_average_precision(precisions, recalls):
         else:
             average_precision += new_precisions[current_index]
     average_precision /= 11
+    '''
+
+    interp = np.interp(recall_levels, recalls, precisions, right=0)
+    #interp = np.interp(recall_levels, recalls, precisions)
+    average_precision = sum(interp)/11
     return average_precision
 
 
