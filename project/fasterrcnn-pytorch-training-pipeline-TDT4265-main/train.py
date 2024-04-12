@@ -3,6 +3,7 @@ USAGE
 
 # training with Faster RCNN ResNet50 FPN model without mosaic or any other augmentation:
 python train.py --model fasterrcnn_resnet50_fpn --epochs 2 --data data_configs/voc.yaml --mosaic 0 --batch 4
+python train.py --model fasterrcnn_resnet50_fpn --epochs 15 --data data_configs/voc.yaml --mosaic 0 --batch 16
 
 # Training on ResNet50 FPN with custom project folder name with mosaic augmentation (ON by default):
 python train.py --model fasterrcnn_resnet50_fpn --epochs 2 --data data_configs/voc.yaml --name resnet50fpn_voc --batch 4
