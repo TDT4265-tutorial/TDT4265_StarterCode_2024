@@ -5,6 +5,9 @@ TRAIN_DIR_LABELS: 'data/LiDAR/archive/data/labels/train'
 VALID_DIR_IMAGES: 'data/LiDAR/archive/data/images/val'
 VALID_DIR_LABELS: 'data/LiDAR/archive/data/labels/val'
 
+TEST_DIR_IMAGES: 'data/LiDAR/archive/data/images/test'
+TEST_DIR_LABELS: 'data/LiDAR/archive/data/labels/test'
+
 # Class names.
 CLASSES: [
     '__background__',

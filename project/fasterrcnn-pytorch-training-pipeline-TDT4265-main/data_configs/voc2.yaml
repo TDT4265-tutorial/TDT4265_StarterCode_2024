@@ -1,0 +1,22 @@
+# Images and labels direcotry should be relative to train.py
+"this config file was used to run with the cropped-images"
+
+TRAIN_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/train'
+TRAIN_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/train'
+VALID_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/val'
+VALID_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/val'
+
+TEST_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/test'
+TEST_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/test'
+
+# Class names.
+CLASSES: [
+    '__background__',
+    'car', 'truck', 'bus', 'motorcycle', 'bicycle', 'scooter', 'person', 'rider'
+]
+
+# Number of classes (object classes + 1 for background class in Faster RCNN).
+NC: 9
+
+# Whether to save the predictions of the validation set while training.
+SAVE_VALID_PREDICTION_IMAGES: True

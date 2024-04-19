@@ -2,19 +2,44 @@
 USAGE
 
 # training with Faster RCNN ResNet50 FPN model without mosaic or any other augmentation:
-python train.py --model fasterrcnn_resnet50_fpn --epochs 2 --data data_configs/voc.yaml --mosaic 0 --batch 4
-python train.py --model fasterrcnn_resnet50_fpn --epochs 15 --data data_configs/voc.yaml --mosaic 0 --batch 16
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 2 --data data_configs/voc.yaml --mosaic 0 --batch 4
 
 # Training on ResNet50 FPN with custom project folder name with mosaic augmentation (ON by default):
-python train.py --model fasterrcnn_resnet50_fpn --epochs 2 --data data_configs/voc.yaml --name resnet50fpn_voc --batch 4
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 2 --data data_configs/voc.yaml --name resnet50fpn_voc --batch 4
 
 # Training on ResNet50 FPN with custom project folder name with mosaic augmentation (ON by default) and added training augmentations:
-python train.py --model fasterrcnn_resnet50_fpn --epochs 2 --use-train-aug --data data_configs/voc.yaml --name resnet50fpn_voc --batch 4
+python train.py --model fasterrcnn_resnet50_fpn --epochs 15 --use-train-aug --data data_configs/voc.yaml --name resnet50fpn_voc --batch 8
 
 # Distributed training:
 export CUDA_VISIBLE_DEVICES=0,1
 python -m torch.distributed.launch --nproc_per_node=2 --use_env train.py --data data_configs/smoke.yaml --epochs 100 --model fasterrcnn_resnet50_fpn --name smoke_training --batch 16
 """
+
+
+"""
+
+3. training:                                    (25.24 min)
+python train.py --model fasterrcnn_resnet50_fpn --epochs 15 --data data_configs/voc.yaml --mosaic 0 --batch 4
+
+4. training: With mosaic AND model: fpn_v2      (28.26 min)
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 15 --data data_configs/voc.yaml --name with_mosaic --batch 8
+
+5. training: model: fpn_v2 Without mosaic       (9.747 min)
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 15 --data data_configs/voc.yaml --mosaic 0 --name no_mosaic_v2 --batch 8
+
+5. training: model: fpn_v2 Without mosaic       (9.747 min)
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 15 --use-train-aug --data data_configs/voc.yaml --mosaic 0 --name mosaic_v2_dataaug --batch 8
+
+6. training: model: fpn_v2 With mosaic          ()
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 30 --use-train-aug --data data_configs/voc2.yaml --name mosaic_v2_dataaug_e30_CROPED_IM --batch 8
+
+
+
+"""
+
+
+
+
 from torch_utils.engine import (
     train_one_epoch, evaluate, utils
 )
