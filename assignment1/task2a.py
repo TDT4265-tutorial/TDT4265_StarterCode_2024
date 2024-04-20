@@ -12,8 +12,15 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
+    print()
+    out = np.ndarray(shape=(X.shape[0], 785), dtype=float)
+
+    for i in range(X.shape[0]):
+        for j in range(X.shape[1]):
+            out[i, j+1] = X[i, j]*2/255-1
+        out[i, 0] = 1
     # TODO implement this function (Task 2a)
-    return X
+    return out
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
@@ -24,17 +31,19 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     Returns:
         Cross entropy error (float)
     """
+    errors = -(targets*np.log(outputs) + (1-targets)*np.log(1-outputs))
+    sum = np.sum(errors)/targets.shape[0]
     # TODO implement this function (Task 2a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
+    return sum
 
 
 class BinaryModel:
 
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -45,8 +54,10 @@ class BinaryModel:
         Returns:
             y: output of model with shape [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
-        return None
+        
+        wtx = X.dot(self.w)
+        y = 1/(1+np.exp(-wtx))
+        return y
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -60,8 +71,18 @@ class BinaryModel:
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)
+        print("grad shape: ", self.grad.shape)
+        delta_y = targets - outputs
+        print("delta_y shape: ", delta_y.shape)
+        out = X.transpose().dot(delta_y)
+        print("out shape: ", out.shape)
+        self.grad = -out/X.shape[0]
+        print("grad shape: ", self.grad.shape)
+        #print("Grad:")
+        print("X shape: ", X.shape)
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+        
 
     def zero_grad(self) -> None:
         self.grad = None
@@ -89,6 +110,12 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
         # Actual gradient
         logits = model.forward(X)
         model.backward(X, logits, Y)
+        print("Model grad")
+        print(model.grad[i, 0])
+        print("approx grad")
+        print(gradient_approximation)
+        print()
+        input()
         difference = gradient_approximation - model.grad[i, 0]
         assert abs(difference) <= epsilon**2,\
             f"Calculated gradient is incorrect. " \

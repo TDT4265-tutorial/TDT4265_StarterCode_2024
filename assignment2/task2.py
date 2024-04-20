@@ -7,19 +7,24 @@ from trainer import BaseTrainer
 np.random.seed(0)
 
 
-def calculate_accuracy(
-    X: np.ndarray, targets: np.ndarray, model: SoftmaxModel
-) -> float:
+def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model) -> float:
     """
+    Calculate the accuracy of the model's predictions against the true targets.
+    
     Args:
         X: images of shape [batch size, 785]
-        targets: labels/targets of each image of shape: [batch size, 10]
-        model: model of class SoftmaxModel
+        targets: one-hot encoded labels/targets of each image of shape: [batch size, 10]
+        model: an instance of SoftmaxModel
+    
     Returns:
-        Accuracy (float)
+        Accuracy as a float
     """
-    # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    predictions = model.forward(X)
+    predicted_classes = np.argmax(predictions, axis=1)
+    actual_classes = np.argmax(targets, axis=1)
+    correct_predictions = predicted_classes == actual_classes
+    accuracy = np.mean(correct_predictions)
+    print("accuracy", accuracy)
     return accuracy
 
 
@@ -52,7 +57,17 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2c)
-        loss = 0
+
+        logits = self.model.forward(X_batch)
+        loss = cross_entropy_loss(Y_batch, logits)
+        self.model.backward(X_batch, logits, Y_batch)
+
+        for layer_idx, grad in enumerate(self.model.grads):
+            if self.use_momentum:
+                self.previous_grads[layer_idx] = self.momentum_gamma * self.previous_grads[layer_idx] + grad
+                self.model.ws[layer_idx] -= self.learning_rate*self.previous_grads[layer_idx]
+            else:
+                self.model.ws[layer_idx] -= self.learning_rate * grad
 
         return loss
 
@@ -86,11 +101,10 @@ def main():
     momentum_gamma = 0.9  # Task 3 hyperparameter
     shuffle_data = True
 
-    # Settings for task 2 and 3. Keep all to false for task 2.
-    use_improved_sigmoid = False
-    use_improved_weight_init = False
-    use_momentum = False
-    use_relu = False
+    use_improved_sigmoid=True
+    use_improved_weight_init=True
+    use_momentum=True
+    use_relu=False
 
     # Load dataset
     X_train, Y_train, X_val, Y_val = utils.load_full_mnist()
@@ -103,7 +117,9 @@ def main():
     model = SoftmaxModel(
         neurons_per_layer, use_improved_sigmoid, use_improved_weight_init, use_relu
     )
-    trainer = SoftmaxTrainer(
+    model.grads[0] = np.random.uniform(-1, 1, (785, 64))
+    model.grads[1] = np.random.uniform(-1, 1, (64, 10))
+    trainer=SoftmaxTrainer(
         momentum_gamma,
         use_momentum,
         model,
@@ -127,19 +143,20 @@ def main():
     )
     print("Train accuracy:", calculate_accuracy(X_train, Y_train, model))
     print("Validation accuracy:", calculate_accuracy(X_val, Y_val, model))
-
+    print()
     # Plot loss for first model (task 2c)
     plt.figure(figsize=(20, 12))
     plt.subplot(1, 2, 1)
-    plt.ylim([0.0, 0.9])
-    utils.plot_loss(train_history["loss"], "Training Loss", npoints_to_average=10)
+    plt.ylim([0.0, 0.6])
+    utils.plot_loss(train_history["loss"],
+                    "Training Loss", npoints_to_average=10)
     utils.plot_loss(val_history["loss"], "Validation Loss")
     plt.legend()
     plt.xlabel("Number of Training Steps")
     plt.ylabel("Cross Entropy Loss - Average")
     # Plot accuracy
     plt.subplot(1, 2, 2)
-    plt.ylim([0.8, 0.99])
+    plt.ylim([0.8, 1.05])
     utils.plot_loss(train_history["accuracy"], "Training Accuracy")
     utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
     plt.xlabel("Number of Training Steps")
