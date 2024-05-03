@@ -16,6 +16,11 @@ from utils.general import set_infer_dir
 from utils.transforms import infer_transforms, resize
 from utils.logging import log_to_json
 
+
+# In this case you only need to give the weights file path and input file path. The config file and the model name are optional. If not provided they will will be automatically inferred from the weights file.
+
+# python inference.py --input data/LiDAR/archive/data/images/test/frame_000004.PNG --weights outputs/training/mosaic_v2_dataaug_e30_AdamW/last_model_state.pth
+
 def collect_all_images(dir_test):
     """
     Function to return a list of image paths.

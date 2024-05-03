@@ -33,6 +33,9 @@ python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 15 --use-train-aug -
 6. training: model: fpn_v2 With mosaic          ()
 python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 30 --use-train-aug --data data_configs/voc2.yaml --name mosaic_v2_dataaug_e30_CROPED_IM --batch 8
 
+python train.py --model fasterrcnn_resnet50_fpn_v2 --epochs 30 --use-train-aug --data data_configs/voc.yaml --name split_100 --batch 8
+
+python train.py --model fasterrcnn_darknet --epochs 10 --use-train-aug --data data_configs/voc.yaml --name darknet_NoShuff --batch 8
 
 
 """
@@ -405,8 +408,8 @@ def main(args):
     # Get the model parameters.
     params = [p for p in model.parameters() if p.requires_grad]
     # Define the optimizer.
-    optimizer = torch.optim.SGD(params, lr=args['lr'], momentum=0.9, nesterov=True)
-    # optimizer = torch.optim.AdamW(params, lr=0.0001, weight_decay=0.0005)
+    #optimizer = torch.optim.SGD(params, lr=args['lr'], momentum=0.9, nesterov=True)
+    optimizer = torch.optim.AdamW(params, lr=0.0001, weight_decay=0.0005)
     if args['resume_training']: 
         # LOAD THE OPTIMIZER STATE DICTIONARY FROM THE CHECKPOINT.
         print('Loading optimizer state dictionary...')

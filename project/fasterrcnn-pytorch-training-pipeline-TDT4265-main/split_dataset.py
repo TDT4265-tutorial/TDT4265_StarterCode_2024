@@ -19,7 +19,7 @@ label_files = os.listdir(labels_folder)
 
 # Shuffle while maintaining correspondence
 combined = list(zip(image_files, label_files))
-random.shuffle(combined)
+#random.shuffle(combined) #this is the shuffling, by commenting out, we have no
 image_files_shuffled, label_files_shuffled = zip(*combined)
 
 # Define train, test, and validation splits

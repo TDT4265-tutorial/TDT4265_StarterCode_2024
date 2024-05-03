@@ -1,0 +1,29 @@
+Using the Faster RCNN model:
+
+- train the model with this command:
+	$ python train.py --model fasterrcnn_resnet50_fpn --epochs 15 --data data_configs voc.yaml --mosaic 0 --batch 16
+	
+- run this command to display the results (loss and mAP):
+	$ tensorboard --logdir=.
+	
+- follow the localhost link
+
+- alternaltively, the runs and metrics can be displayed at Wandb on this link:
+https://wandb.ai/alfredin/TDT4265_StarterCode_assignments-project_fasterrcnn-pytorch-training-pipeline-TDT4265-main?nw=nwuseralfredin
+
+
+
+
+
+How we handled the data:
+- First qwe had to converte our Yolo formated data into Pascal Voc formate:
+-converte the data from YOLO foramte (.txt) to Pascal voc formate (.XML files). We did this by using an existing code-repo, and chainging the file locations, classes, the image-formate (to take.PNG), and some other samll stuff.
+the new .XML files where placed in "data/LiDAR/archive/outputs"
+
+- created a script (help by ChatGPT) that randomly shuffle the pars of image and voc (in outputs-folder) files into val, train and test folders inside the Faster RCNN project.
+
+- update the paths and classes in the voc.yaml file in fasterrcnn/data_configs to match thelocation of the train, test and val folders.
+
+- extended the Faster RCNN code to handle also .PNG images.
+
+

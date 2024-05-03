@@ -1,13 +1,15 @@
 # Images and labels direcotry should be relative to train.py
-"this config file was used to run with the cropped-images"
+#this config file was used to run with the cropped-images
 
 TRAIN_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/train'
 TRAIN_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/train'
 VALID_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/val'
 VALID_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/val'
 
-TEST_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/test'
-TEST_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/test'
+TEST_DIR_IMAGES: 'data/LiDAR/archive/data/images/test'
+TEST_DIR_LABELS: 'data/LiDAR/archive/data/labels/test'
+#TEST_DIR_IMAGES: 'data/LiDAR/archive/data/crop_images/test'
+#TEST_DIR_LABELS: 'data/LiDAR/archive/data/crop_labels/test'
 
 # Class names.
 CLASSES: [
